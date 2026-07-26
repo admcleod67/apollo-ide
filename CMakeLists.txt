@@ -38,11 +38,6 @@ target_include_directories(apollo-ide PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_link_libraries(apollo-ide PRIVATE Qt6::Widgets)
 
-set_target_properties(apollo-ide PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
-)
-
 if (BUILD_TESTING)
     include(CTest)
     add_subdirectory(tests)

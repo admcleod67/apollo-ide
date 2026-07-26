@@ -95,8 +95,7 @@ cmake --build build
 Run the IDE:
 
 ```bash
-./build/apollo-ide.app/Contents/MacOS/apollo-ide   # macOS (bundle)
-# or: ./build/apollo-ide                          # Linux / non-bundle builds
+./build/apollo-ide
 ```
 
 On macOS with Homebrew Qt, CMake normally finds Qt 6 automatically. If configure

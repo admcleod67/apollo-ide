@@ -2,6 +2,7 @@
 
 #include "editorwidget.h"
 
+#include <QAction>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -33,12 +34,28 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::createMenus()
 {
     auto *fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(tr("&New"), QKeySequence::New, this, &MainWindow::newFile);
-    fileMenu->addAction(tr("&Open…"), QKeySequence::Open, this, &MainWindow::openFile);
-    fileMenu->addAction(tr("&Save"), QKeySequence::Save, this, &MainWindow::saveFile);
-    fileMenu->addAction(tr("Save &As…"), QKeySequence::SaveAs, this, &MainWindow::saveFileAs);
+
+    auto *newAction = fileMenu->addAction(tr("&New"));
+    newAction->setShortcut(QKeySequence::New);
+    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
+
+    auto *openAction = fileMenu->addAction(tr("&Open..."));
+    openAction->setShortcut(QKeySequence::Open);
+    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
+
+    auto *saveAction = fileMenu->addAction(tr("&Save"));
+    saveAction->setShortcut(QKeySequence::Save);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+
+    auto *saveAsAction = fileMenu->addAction(tr("Save &As..."));
+    saveAsAction->setShortcut(QKeySequence::SaveAs);
+    connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveFileAs);
+
     fileMenu->addSeparator();
-    fileMenu->addAction(tr("&Quit"), QKeySequence::Quit, this, &QWidget::close);
+
+    auto *quitAction = fileMenu->addAction(tr("&Quit"));
+    quitAction->setShortcut(QKeySequence::Quit);
+    connect(quitAction, &QAction::triggered, this, &QWidget::close);
 }
 
 void MainWindow::updateWindowTitle()
@@ -97,7 +114,7 @@ bool MainWindow::saveDocumentAs()
     const QString path = QFileDialog::getSaveFileName(
         this,
         tr("Save As"),
-        m_editor->filePath().isEmpty() ? QStringLiteral("untitled.pas") : m_editor->filePath(),
+        m_editor->filePath(),
         tr("Pascal sources (*.pas);;All files (*)"));
 
     if (path.isEmpty()) {
