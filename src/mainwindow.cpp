@@ -2,50 +2,54 @@
 
 #include "compileradapter.h"
 #include "editorwidget.h"
+#include "vmadapter.h"
 
 #include <QAction>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QKeySequence>
-#include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QProcessEnvironment>
 #include <QSplitter>
-#include <QVBoxLayout>
-#include <QWidget>
+#include <QTabWidget>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_editor(new EditorWidget(this))
+    , m_outputTabs(new QTabWidget(this))
     , m_compilerOutput(new QPlainTextEdit(this))
+    , m_runtimeOutput(new QPlainTextEdit(this))
     , m_compiler(new CompilerAdapter(this))
+    , m_vm(new VmAdapter(this))
 {
     resize(960, 640);
 
     m_compilerOutput->setReadOnly(true);
     m_compilerOutput->setPlaceholderText(tr("Compiler output"));
+    m_runtimeOutput->setReadOnly(true);
+    m_runtimeOutput->setPlaceholderText(tr("Runtime output"));
 
-    auto *outputContainer = new QWidget(this);
-    auto *outputLayout = new QVBoxLayout(outputContainer);
-    outputLayout->setContentsMargins(0, 0, 0, 0);
-    outputLayout->setSpacing(2);
-    outputLayout->addWidget(new QLabel(tr("Compiler"), outputContainer));
-    outputLayout->addWidget(m_compilerOutput);
+    m_outputTabs->addTab(m_compilerOutput, tr("Compiler"));
+    m_outputTabs->addTab(m_runtimeOutput, tr("Runtime"));
 
     auto *splitter = new QSplitter(Qt::Vertical, this);
     splitter->addWidget(m_editor);
-    splitter->addWidget(outputContainer);
+    splitter->addWidget(m_outputTabs);
     splitter->setStretchFactor(0, 3);
     splitter->setStretchFactor(1, 1);
     setCentralWidget(splitter);
 
-    const QString envCompiler =
-        QProcessEnvironment::systemEnvironment().value(QStringLiteral("APOLLO_COMPILER"));
+    const auto env = QProcessEnvironment::systemEnvironment();
+    const QString envCompiler = env.value(QStringLiteral("APOLLO_COMPILER"));
     if (!envCompiler.isEmpty()) {
         m_compiler->setCompilerPath(envCompiler);
+    }
+    const QString envVm = env.value(QStringLiteral("APOLLO_VM"));
+    if (!envVm.isEmpty()) {
+        m_vm->setVmPath(envVm);
     }
 
     createMenus();
@@ -55,6 +59,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_compiler, &CompilerAdapter::compileFinished, this, &MainWindow::onCompileFinished);
     connect(m_compiler, &CompilerAdapter::compileFailedToStart, this,
             &MainWindow::onCompileFailedToStart);
+    connect(m_vm, &VmAdapter::runStarted, this, &MainWindow::onRunStarted);
+    connect(m_vm, &VmAdapter::runFinished, this, &MainWindow::onRunFinished);
+    connect(m_vm, &VmAdapter::runFailedToStart, this, &MainWindow::onRunFailedToStart);
 
     updateWindowTitle();
 }
@@ -98,6 +105,11 @@ void MainWindow::createMenus()
     auto *compileAction = buildMenu->addAction(tr("&Compile"));
     compileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
     connect(compileAction, &QAction::triggered, this, &MainWindow::compileFile);
+
+    auto *runMenu = menuBar()->addMenu(tr("&Run"));
+    auto *runAction = runMenu->addAction(tr("&Run"));
+    runAction->setShortcut(QKeySequence(Qt::Key_F5));
+    connect(runAction, &QAction::triggered, this, &MainWindow::runFile);
 }
 
 void MainWindow::updateWindowTitle()
@@ -170,6 +182,23 @@ bool MainWindow::saveDocumentAs()
     return true;
 }
 
+bool MainWindow::prepareSourceForBuild()
+{
+    if (m_editor->isDirty() || m_editor->filePath().isEmpty()) {
+        if (!saveDocument()) {
+            return false;
+        }
+    }
+
+    if (m_editor->filePath().isEmpty()) {
+        QMessageBox::information(this, tr("Apollo IDE"),
+                                 tr("Save the source file before compiling."));
+        return false;
+    }
+
+    return true;
+}
+
 void MainWindow::newFile()
 {
     if (!maybeSave()) {
@@ -211,27 +240,35 @@ void MainWindow::saveFileAs()
 
 void MainWindow::compileFile()
 {
-    if (m_compiler->isRunning()) {
+    if (m_compiler->isRunning() || m_vm->isRunning()) {
         return;
     }
 
-    if (m_editor->isDirty() || m_editor->filePath().isEmpty()) {
-        if (!saveDocument()) {
-            return;
-        }
-    }
-
-    if (m_editor->filePath().isEmpty()) {
-        QMessageBox::information(this, tr("Apollo IDE"),
-                                 tr("Save the source file before compiling."));
+    m_runAfterCompile = false;
+    if (!prepareSourceForBuild()) {
         return;
     }
 
     m_compiler->compileFile(m_editor->filePath());
 }
 
+void MainWindow::runFile()
+{
+    if (m_compiler->isRunning() || m_vm->isRunning()) {
+        return;
+    }
+
+    if (!prepareSourceForBuild()) {
+        return;
+    }
+
+    m_runAfterCompile = true;
+    m_compiler->compileFile(m_editor->filePath());
+}
+
 void MainWindow::onCompileStarted()
 {
+    m_outputTabs->setCurrentWidget(m_compilerOutput);
     m_compilerOutput->setPlainText(tr("Compiling…"));
 }
 
@@ -259,9 +296,55 @@ void MainWindow::onCompileFinished(bool ok, const QString &stdoutText,
     }
 
     m_compilerOutput->setPlainText(text);
+    m_outputTabs->setCurrentWidget(m_compilerOutput);
+
+    const bool shouldRun = m_runAfterCompile;
+    m_runAfterCompile = false;
+
+    if (shouldRun && ok && !m_compiler->lastBytecodePath().isEmpty()) {
+        m_vm->runBytecode(m_compiler->lastBytecodePath());
+    }
 }
 
 void MainWindow::onCompileFailedToStart(const QString &message)
 {
+    m_runAfterCompile = false;
+    m_outputTabs->setCurrentWidget(m_compilerOutput);
     m_compilerOutput->setPlainText(message);
+}
+
+void MainWindow::onRunStarted()
+{
+    m_outputTabs->setCurrentWidget(m_runtimeOutput);
+    m_runtimeOutput->setPlainText(tr("Running…"));
+}
+
+void MainWindow::onRunFinished(bool ok, const QString &stdoutText, const QString &stderrText,
+                               int exitCode)
+{
+    QString text = stdoutText;
+    if (!text.isEmpty() && !text.endsWith(QLatin1Char('\n'))) {
+        text += QLatin1Char('\n');
+    }
+    if (!stderrText.isEmpty()) {
+        text += stderrText;
+        if (!text.endsWith(QLatin1Char('\n'))) {
+            text += QLatin1Char('\n');
+        }
+    }
+
+    if (ok) {
+        text += tr("Run finished.");
+    } else {
+        text += tr("Run failed (exit %1).").arg(exitCode);
+    }
+
+    m_runtimeOutput->setPlainText(text);
+    m_outputTabs->setCurrentWidget(m_runtimeOutput);
+}
+
+void MainWindow::onRunFailedToStart(const QString &message)
+{
+    m_outputTabs->setCurrentWidget(m_runtimeOutput);
+    m_runtimeOutput->setPlainText(message);
 }

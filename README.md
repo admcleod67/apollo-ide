@@ -82,7 +82,8 @@ This structure will expand as new features are introduced.
 - A C++20 toolchain
 - Apollo Pascal Compiler (`apolloc` from apollo-compiler) on `PATH`, or set
   `APOLLO_COMPILER` to its full path — required to compile from the IDE
-- Gemini VM executable (from gemini-system) — required for Milestone 1 run support (M1c+)
+- Gemini VM (`gemini-vm` from pick-system / gemini-system) on `PATH`, or set
+  `APOLLO_VM` to its full path — required to run from the IDE
 
 ## Building
 
@@ -99,15 +100,18 @@ Run the IDE:
 ./build/apollo-ide
 ```
 
-Optional: point at a specific compiler binary:
+Optional: point at specific toolchain binaries:
 
 ```bash
 export APOLLO_COMPILER=/path/to/apolloc
+export APOLLO_VM=/path/to/gemini-vm
 ./build/apollo-ide
 ```
 
-Then open a `.pas` file and use **Build → Compile** (Ctrl+B / Cmd+B). Successful
-compiles write a sibling `.tbc` file next to the source (e.g. `hello.pas` → `hello.tbc`).
+Then open a `.pas` file and use **Build → Compile** (Ctrl+B / Cmd+B) or
+**Run → Run** (F5). Run compiles first, then executes the sibling `.tbc` with
+`gemini-vm` when compile succeeds. Compiler and runtime output appear on separate
+tabs.
 
 On macOS with Homebrew Qt, CMake normally finds Qt 6 automatically. If configure
 fails to locate Qt, pass the prefix explicitly:
@@ -116,7 +120,7 @@ fails to locate Qt, pass the prefix explicitly:
 cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
 ```
 
-Run tests (editor persistence and compiler adapter; no real `apolloc` required):
+Run tests (editor, compiler adapter, and VM adapter; no real toolchain required):
 
 ```bash
 ctest --test-dir build --output-on-failure

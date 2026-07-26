@@ -37,3 +37,24 @@ target_link_libraries(compileradapter_test PRIVATE
 )
 
 add_test(NAME compileradapter_test COMMAND compileradapter_test)
+
+add_executable(vmadapter_test
+    vmadapter_test.cpp
+    ../src/vmadapter.cpp
+    ../src/vmadapter.h
+)
+
+target_include_directories(vmadapter_test PRIVATE
+    "${CMAKE_SOURCE_DIR}/src"
+)
+
+target_compile_definitions(vmadapter_test PRIVATE
+    APOLLO_TEST_FIXTURES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
+)
+
+target_link_libraries(vmadapter_test PRIVATE
+    Qt6::Widgets
+    Qt6::Test
+)
+
+add_test(NAME vmadapter_test COMMAND vmadapter_test)

@@ -125,7 +125,7 @@ clears `lastBytecodePath()` and does not write (or leave a successful) artifact 
 
 ---
 
-### Stage 3 — VM execution (M1c)
+### Stage 3 — VM execution (M1c) — completed
 
 **Objective:** Run successfully compiled Gemini bytecode on the Gemini VM from the IDE.
 
@@ -136,6 +136,13 @@ clears `lastBytecodePath()` and does not write (or leave a successful) artifact 
 - Capture and display VM stdout/stderr in an output pane
 - Surface non-zero VM exit status to the user
 
+**Run policy:** **Run = compile-then-run.** Save if needed, compile with `apolloc --emit`,
+and only if compile succeeds invoke `gemini-vm` on the sibling `.tbc`. Plain
+**Build → Compile** does not run the VM. Failed compile never starts the VM.
+
+**VM path (M1c):** `APOLLO_VM` environment variable if set; otherwise `gemini-vm` on
+`PATH`. Settings UI is deferred to M1d.
+
 **Out of scope for Stage 3**
 
 - Interactive stdin beyond a minimal approach (defer rich console I/O if costly)
@@ -144,10 +151,10 @@ clears `lastBytecodePath()` and does not write (or leave a successful) artifact 
 
 **Acceptance criteria**
 
-- [ ] After a successful compile, Run executes the program on the Gemini VM
-- [ ] Program output appears in the IDE
-- [ ] VM failures and missing VM executable are reported clearly
-- [ ] User can distinguish compiler output from runtime output (separate panes or clear
+- [x] After a successful compile, Run executes the program on the Gemini VM
+- [x] Program output appears in the IDE
+- [x] VM failures and missing VM executable are reported clearly
+- [x] User can distinguish compiler output from runtime output (separate panes or clear
       labelling)
 
 ---
@@ -195,7 +202,7 @@ MainWindow
 |-------|--------|
 | M1a — Editor foundation | Completed |
 | M1b — Compiler integration | Completed |
-| M1c — VM execution | Not started |
+| M1c — VM execution | Completed |
 | M1d — Workflow polish & close-out | Not started |
 
 ---
