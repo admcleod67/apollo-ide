@@ -58,6 +58,14 @@ compile_commands.json
 *.bak
 *.swp
 
+# Qt / IDE
+*.user
+*.user.*
+.qtcreator/
+CMakeLists.txt.user
+.idea/
+.vscode/
+
 # vcpkg
 vcpkg_installed/
 

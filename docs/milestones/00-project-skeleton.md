@@ -1,10 +1,13 @@
 ← [Project milestones index](../milestones.md)
 
-## Milestone 0 — Project skeleton
+## Milestone 0 — Project skeleton (completed)
 
 This document defines **Milestone 0**: the Apollo IDE repository and application
 bootstrap. It establishes build, layout, and documentation so Milestone 1 can add real
 edit → compile → run behaviour without reworking foundations.
+
+**Release note:** Milestone 0 is complete. The application reports `0.0.0`
+(`${PROJECT_VERSION}` from CMake).
 
 It complements:
 
@@ -32,7 +35,7 @@ It complements:
 
 ### Repository and build
 
-- Top-level `CMakeLists.txt` for a Qt 6 Widgets (or Quick, if chosen) application target
+- Top-level `CMakeLists.txt` for a Qt 6 Widgets application target
 - CMake helpers under `cmake/` as needed (e.g. Qt find helpers, common options)
 - `.gitignore` suitable for CMake/Qt build trees
 - Application builds and launches on at least one supported host (macOS / Linux / Windows)
@@ -58,12 +61,12 @@ It complements:
 
 ## Acceptance criteria
 
-- [ ] `cmake` configure + build succeeds with Qt 6 available
-- [ ] Running the IDE binary shows a main window (title/menu stub is enough)
-- [ ] Repository layout matches the initial structure in the README (or an explicitly
+- [x] `cmake` configure + build succeeds with Qt 6 available
+- [x] Running the IDE binary shows a main window (title/menu stub is enough)
+- [x] Repository layout matches the initial structure in the README (or an explicitly
       documented evolution of it)
-- [ ] Milestone 0 and Milestone 1 detail pages exist and are linked from the milestones index
-- [ ] README or docs note how to configure and build the skeleton
+- [x] Milestone 0 and Milestone 1 detail pages exist and are linked from the milestones index
+- [x] README or docs note how to configure and build the skeleton
 
 ---
 

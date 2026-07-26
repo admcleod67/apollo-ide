@@ -78,9 +78,33 @@ This structure will expand as new features are introduced.
 ## Requirements
 
 - Qt 6 (or later)
-- CMake
-- Apollo Pascal Compiler (from apollo-compiler)
-- Gemini VM executable (from gemini-system)
+- CMake 3.16+
+- A C++20 toolchain
+- Apollo Pascal Compiler (from apollo-compiler) — required for Milestone 1+
+- Gemini VM executable (from gemini-system) — required for Milestone 1+
+
+## Building
+
+Configure and build out of source:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
+Run the IDE:
+
+```bash
+./build/apollo-ide.app/Contents/MacOS/apollo-ide   # macOS (bundle)
+# or: ./build/apollo-ide                          # Linux / non-bundle builds
+```
+
+On macOS with Homebrew Qt, CMake normally finds Qt 6 automatically. If configure
+fails to locate Qt, pass the prefix explicitly:
+
+```bash
+cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+```
 
 ## License
 
