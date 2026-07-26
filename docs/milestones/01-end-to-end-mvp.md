@@ -88,7 +88,7 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 2 — Compiler integration (M1b)
+### Stage 2 — Compiler integration (M1b) — completed
 
 **Objective:** Compile the current file through the Apollo Pascal Compiler and show
 results in the IDE.
@@ -103,6 +103,13 @@ results in the IDE.
 - Discovery of the produced bytecode artifact path for Stage 3 (convention or compiler
   output parsing — document the chosen rule)
 
+**Artifact rule:** `apolloc --emit` writes `.tbc` text to stdout. On success the IDE
+writes that stdout to a sibling file: `/path/to/foo.pas` → `/path/to/foo.tbc`. Failure
+clears `lastBytecodePath()` and does not write (or leave a successful) artifact for run.
+
+**Compiler path (M1b):** `APOLLO_COMPILER` environment variable if set; otherwise
+`apolloc` on `PATH`. Settings UI is deferred to M1d.
+
 **Out of scope for Stage 2**
 
 - Running the VM
@@ -111,10 +118,10 @@ results in the IDE.
 
 **Acceptance criteria**
 
-- [ ] Compile a known-good example (e.g. apollo-compiler `hello.pas`) succeeds
-- [ ] Compiler errors appear in the IDE output/diagnostics view
-- [ ] Failed compile does not proceed to a run step
-- [ ] Adapter fails cleanly if the compiler executable is missing or misconfigured
+- [x] Compile a known-good example (e.g. apollo-compiler `hello.pas`) succeeds
+- [x] Compiler errors appear in the IDE output/diagnostics view
+- [x] Failed compile does not proceed to a run step
+- [x] Adapter fails cleanly if the compiler executable is missing or misconfigured
 
 ---
 
@@ -187,7 +194,7 @@ MainWindow
 | Slice | Status |
 |-------|--------|
 | M1a — Editor foundation | Completed |
-| M1b — Compiler integration | Not started |
+| M1b — Compiler integration | Completed |
 | M1c — VM execution | Not started |
 | M1d — Workflow polish & close-out | Not started |
 

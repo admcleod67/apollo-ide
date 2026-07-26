@@ -80,8 +80,9 @@ This structure will expand as new features are introduced.
 - Qt 6 (or later)
 - CMake 3.16+
 - A C++20 toolchain
-- Apollo Pascal Compiler (from apollo-compiler) — required for Milestone 1+
-- Gemini VM executable (from gemini-system) — required for Milestone 1+
+- Apollo Pascal Compiler (`apolloc` from apollo-compiler) on `PATH`, or set
+  `APOLLO_COMPILER` to its full path — required to compile from the IDE
+- Gemini VM executable (from gemini-system) — required for Milestone 1 run support (M1c+)
 
 ## Building
 
@@ -98,6 +99,16 @@ Run the IDE:
 ./build/apollo-ide
 ```
 
+Optional: point at a specific compiler binary:
+
+```bash
+export APOLLO_COMPILER=/path/to/apolloc
+./build/apollo-ide
+```
+
+Then open a `.pas` file and use **Build → Compile** (Ctrl+B / Cmd+B). Successful
+compiles write a sibling `.tbc` file next to the source (e.g. `hello.pas` → `hello.tbc`).
+
 On macOS with Homebrew Qt, CMake normally finds Qt 6 automatically. If configure
 fails to locate Qt, pass the prefix explicitly:
 
@@ -105,7 +116,7 @@ fails to locate Qt, pass the prefix explicitly:
 cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
 ```
 
-Run editor persistence tests:
+Run tests (editor persistence and compiler adapter; no real `apolloc` required):
 
 ```bash
 ctest --test-dir build --output-on-failure
