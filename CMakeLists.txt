@@ -18,6 +18,8 @@ set(CMAKE_AUTOUIC ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(ApolloIdeDefaults)
 
+option(BUILD_TESTING "Build and register tests" ON)
+
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 add_executable(apollo-ide
@@ -40,3 +42,8 @@ set_target_properties(apollo-ide PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
+if (BUILD_TESTING)
+    include(CTest)
+    add_subdirectory(tests)
+endif ()

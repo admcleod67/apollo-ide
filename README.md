@@ -106,6 +106,12 @@ fails to locate Qt, pass the prefix explicitly:
 cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
 ```
 
+Run editor persistence tests:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

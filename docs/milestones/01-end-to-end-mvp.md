@@ -62,7 +62,7 @@ the **Implementation status** section when closed.
 
 ## Staged delivery plan
 
-### Stage 1 — Editor foundation (M1a)
+### Stage 1 — Editor foundation (M1a) — completed
 
 **Objective:** Use the IDE as a simple Pascal source editor with file persistence.
 
@@ -81,10 +81,10 @@ the **Implementation status** section when closed.
 
 **Acceptance criteria**
 
-- [ ] Create a new buffer, type Pascal source, save to disk
-- [ ] Open an existing `.pas` file and edit it
-- [ ] Save As writes a new path and subsequent Save uses that path
-- [ ] Closing with unsaved changes prompts the user
+- [x] Create a new buffer, type Pascal source, save to disk
+- [x] Open an existing `.pas` file and edit it
+- [x] Save As writes a new path and subsequent Save uses that path
+- [x] Closing with unsaved changes prompts the user
 
 ---
 
@@ -186,7 +186,7 @@ MainWindow
 
 | Slice | Status |
 |-------|--------|
-| M1a — Editor foundation | Not started |
+| M1a — Editor foundation | Completed |
 | M1b — Compiler integration | Not started |
 | M1c — VM execution | Not started |
 | M1d — Workflow polish & close-out | Not started |
