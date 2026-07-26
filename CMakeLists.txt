@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
     apollo-ide
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Cross-platform Qt IDE for Apollo compilers targeting the Gemini VM"
     LANGUAGES CXX
 )
