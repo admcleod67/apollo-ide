@@ -9,4 +9,4 @@ Each file under [`milestones/`](milestones/) uses a **two-digit** prefix so list
 sort in numeric order. See [`milestones/README.md`](milestones/README.md).
 
 - [Milestone 0 — Project skeleton](milestones/00-project-skeleton.md) (completed)
-- [Milestone 1 — End-to-end edit → compile → run](milestones/01-end-to-end-mvp.md)
+- [Milestone 1 — End-to-end edit → compile → run](milestones/01-end-to-end-mvp.md) (completed)

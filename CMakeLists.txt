@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
     apollo-ide
-    VERSION 0.0.0
+    VERSION 0.1.0
     DESCRIPTION "Cross-platform Qt IDE for Apollo compilers targeting the Gemini VM"
     LANGUAGES CXX
 )
@@ -32,9 +32,17 @@ add_executable(apollo-ide
     src/compileradapter.h
     src/vmadapter.cpp
     src/vmadapter.h
+    src/toolchainsettings.cpp
+    src/toolchainsettings.h
+    src/settingsdialog.cpp
+    src/settingsdialog.h
 )
 
 target_include_directories(apollo-ide PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+target_compile_definitions(apollo-ide PRIVATE
+    APOLLO_IDE_VERSION="${PROJECT_VERSION}"
+)
 
 target_link_libraries(apollo-ide PRIVATE Qt6::Widgets)
 

@@ -10,13 +10,14 @@ The IDE is designed to evolve iteratively and incrementally alongside the compil
 
 ## Current Status
 
-The project is in its early stages. The initial MVP will provide:
+**Milestone 1 (0.1.0)** is complete. The MVP provides:
 
 - Creation and editing of Pascal source files
 - Saving and loading files
 - Invoking the Apollo Pascal Compiler
 - Running compiled Gemini bytecode on the Gemini VM
 - Displaying compiler diagnostics and runtime output
+- Preferences for toolchain paths, plus a toolbar for common actions
 
 Future versions will expand on this foundation with project management, syntax highlighting, debugging support, multi-file builds, and additional language front-ends.
 
@@ -53,7 +54,6 @@ This separation ensures that the IDE remains flexible, portable, and language-ag
 - Build pipelines for multi-file programs
 - Integrated Gemini VM debugger
 - Language service modules for future Apollo compilers
-- Configurable toolchain paths
 - Cross-platform packaging
 
 ## Repository Structure (initial)
@@ -85,6 +85,19 @@ This structure will expand as new features are introduced.
 - Gemini VM (`gemini-vm` from pick-system / gemini-system) on `PATH`, or set
   `APOLLO_VM` to its full path — required to run from the IDE
 
+## Toolchain configuration
+
+Configure paths in the IDE via **File → Preferences…** (or **Apollo IDE → Preferences**
+on macOS). Saved paths are stored in application settings.
+
+Resolution order for each tool:
+
+1. Environment variable, if set (`APOLLO_COMPILER`, `APOLLO_VM`)
+2. Path saved in Preferences
+3. Default binary name on `PATH` (`apolloc`, `gemini-vm`)
+
+Environment variables override Preferences (useful for CLion run configurations and CI).
+
 ## Building
 
 Configure and build out of source:
@@ -100,7 +113,7 @@ Run the IDE:
 ./build/apollo-ide
 ```
 
-Optional: point at specific toolchain binaries:
+Optional env overrides:
 
 ```bash
 export APOLLO_COMPILER=/path/to/apolloc
@@ -108,7 +121,7 @@ export APOLLO_VM=/path/to/gemini-vm
 ./build/apollo-ide
 ```
 
-Then open a `.pas` file and use **Build → Compile** (Ctrl+B / Cmd+B) or
+Open a `.pas` file and use the toolbar or **Build → Compile** (Ctrl+B / Cmd+B) /
 **Run → Run** (F5). Run compiles first, then executes the sibling `.tbc` with
 `gemini-vm` when compile succeeds. Compiler and runtime output appear on separate
 tabs.
@@ -120,7 +133,7 @@ fails to locate Qt, pass the prefix explicitly:
 cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
 ```
 
-Run tests (editor, compiler adapter, and VM adapter; no real toolchain required):
+Run tests (no real toolchain required):
 
 ```bash
 ctest --test-dir build --output-on-failure

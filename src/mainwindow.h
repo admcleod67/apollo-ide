@@ -4,6 +4,7 @@
 
 class CompilerAdapter;
 class EditorWidget;
+class QAction;
 class QCloseEvent;
 class QPlainTextEdit;
 class QTabWidget;
@@ -20,7 +21,12 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
+    void createActions();
     void createMenus();
+    void createToolBar();
+    void applyToolchainPaths();
+    void updateToolchainStatus();
+    void openPreferences();
     void updateWindowTitle();
     bool maybeSave();
     bool saveDocument();
@@ -50,4 +56,13 @@ private:
     CompilerAdapter *m_compiler = nullptr;
     VmAdapter *m_vm = nullptr;
     bool m_runAfterCompile = false;
+
+    QAction *m_newAction = nullptr;
+    QAction *m_openAction = nullptr;
+    QAction *m_saveAction = nullptr;
+    QAction *m_saveAsAction = nullptr;
+    QAction *m_preferencesAction = nullptr;
+    QAction *m_quitAction = nullptr;
+    QAction *m_compileAction = nullptr;
+    QAction *m_runAction = nullptr;
 };

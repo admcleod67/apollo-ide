@@ -159,7 +159,7 @@ and only if compile succeeds invoke `gemini-vm` on the sibling `.tbc`. Plain
 
 ---
 
-### Stage 4 — Workflow polish & close-out (M1d)
+### Stage 4 — Workflow polish & close-out (M1d) — completed
 
 **Objective:** Make the end-to-end path usable day-to-day and close the milestone.
 
@@ -171,12 +171,26 @@ and only if compile succeeds invoke `gemini-vm` on the sibling `.tbc`. Plain
 - README or docs section: how to point the IDE at `apolloc` and the Gemini VM
 - Update milestone index / implementation status; note known limitations
 
+**Configuration:** Preferences dialog persists paths in `QSettings`. Resolution order:
+`APOLLO_COMPILER` / `APOLLO_VM` env (if set) → saved Preferences → defaults `apolloc` /
+`gemini-vm` on `PATH`.
+
 **Acceptance criteria**
 
-- [ ] A new user can configure paths, open an example, compile, and run without reading
+- [x] A new user can configure paths, open an example, compile, and run without reading
       source code
-- [ ] End-to-end path works on at least one host platform used for Apollo development
-- [ ] Milestone 1 marked completed in [`docs/milestones.md`](../milestones.md)
+- [x] End-to-end path works on at least one host platform used for Apollo development
+- [x] Milestone 1 marked completed in [`docs/milestones.md`](../milestones.md)
+
+**Known limitations (M1)**
+
+- Single open document (no tabs/projects)
+- No syntax highlighting or language services
+- No debugger or interactive program stdin
+- Native packaging / installers not included
+
+**Release note:** Milestone 1 is complete. The application reports `0.1.0`
+(`${PROJECT_VERSION}` from CMake). Cut git tag `v0.1.0` when ready.
 
 ---
 
@@ -203,7 +217,7 @@ MainWindow
 | M1a — Editor foundation | Completed |
 | M1b — Compiler integration | Completed |
 | M1c — VM execution | Completed |
-| M1d — Workflow polish & close-out | Not started |
+| M1d — Workflow polish & close-out | Completed |
 
 ---
 

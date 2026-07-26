@@ -58,3 +58,20 @@ target_link_libraries(vmadapter_test PRIVATE
 )
 
 add_test(NAME vmadapter_test COMMAND vmadapter_test)
+
+add_executable(toolchainsettings_test
+    toolchainsettings_test.cpp
+    ../src/toolchainsettings.cpp
+    ../src/toolchainsettings.h
+)
+
+target_include_directories(toolchainsettings_test PRIVATE
+    "${CMAKE_SOURCE_DIR}/src"
+)
+
+target_link_libraries(toolchainsettings_test PRIVATE
+    Qt6::Core
+    Qt6::Test
+)
+
+add_test(NAME toolchainsettings_test COMMAND toolchainsettings_test)

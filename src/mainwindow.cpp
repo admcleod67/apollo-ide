@@ -2,6 +2,8 @@
 
 #include "compileradapter.h"
 #include "editorwidget.h"
+#include "settingsdialog.h"
+#include "toolchainsettings.h"
 #include "vmadapter.h"
 
 #include <QAction>
@@ -12,9 +14,11 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPlainTextEdit>
-#include <QProcessEnvironment>
 #include <QSplitter>
+#include <QStatusBar>
+#include <QStyle>
 #include <QTabWidget>
+#include <QToolBar>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -42,17 +46,10 @@ MainWindow::MainWindow(QWidget *parent)
     splitter->setStretchFactor(1, 1);
     setCentralWidget(splitter);
 
-    const auto env = QProcessEnvironment::systemEnvironment();
-    const QString envCompiler = env.value(QStringLiteral("APOLLO_COMPILER"));
-    if (!envCompiler.isEmpty()) {
-        m_compiler->setCompilerPath(envCompiler);
-    }
-    const QString envVm = env.value(QStringLiteral("APOLLO_VM"));
-    if (!envVm.isEmpty()) {
-        m_vm->setVmPath(envVm);
-    }
-
+    createActions();
     createMenus();
+    createToolBar();
+    applyToolchainPaths();
 
     connect(m_editor, &EditorWidget::documentChanged, this, &MainWindow::updateWindowTitle);
     connect(m_compiler, &CompilerAdapter::compileStarted, this, &MainWindow::onCompileStarted);
@@ -75,41 +72,107 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+void MainWindow::createActions()
+{
+    m_newAction = new QAction(tr("&New"), this);
+    m_newAction->setShortcut(QKeySequence::New);
+    m_newAction->setIcon(style()->standardIcon(QStyle::SP_FileIcon));
+    connect(m_newAction, &QAction::triggered, this, &MainWindow::newFile);
+
+    m_openAction = new QAction(tr("&Open..."), this);
+    m_openAction->setShortcut(QKeySequence::Open);
+    m_openAction->setIcon(style()->standardIcon(QStyle::SP_DirOpenIcon));
+    connect(m_openAction, &QAction::triggered, this, &MainWindow::openFile);
+
+    m_saveAction = new QAction(tr("&Save"), this);
+    m_saveAction->setShortcut(QKeySequence::Save);
+    m_saveAction->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
+    connect(m_saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+
+    m_saveAsAction = new QAction(tr("Save &As..."), this);
+    m_saveAsAction->setShortcut(QKeySequence::SaveAs);
+    connect(m_saveAsAction, &QAction::triggered, this, &MainWindow::saveFileAs);
+
+    m_preferencesAction = new QAction(tr("&Preferences..."), this);
+    m_preferencesAction->setMenuRole(QAction::PreferencesRole);
+    connect(m_preferencesAction, &QAction::triggered, this, &MainWindow::openPreferences);
+
+    m_quitAction = new QAction(tr("&Quit"), this);
+    m_quitAction->setShortcut(QKeySequence::Quit);
+    m_quitAction->setMenuRole(QAction::QuitRole);
+    connect(m_quitAction, &QAction::triggered, this, &QWidget::close);
+
+    m_compileAction = new QAction(tr("&Compile"), this);
+    m_compileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
+    m_compileAction->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    connect(m_compileAction, &QAction::triggered, this, &MainWindow::compileFile);
+
+    m_runAction = new QAction(tr("&Run"), this);
+    m_runAction->setShortcut(QKeySequence(Qt::Key_F5));
+    m_runAction->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+    connect(m_runAction, &QAction::triggered, this, &MainWindow::runFile);
+}
+
 void MainWindow::createMenus()
 {
     auto *fileMenu = menuBar()->addMenu(tr("&File"));
-
-    auto *newAction = fileMenu->addAction(tr("&New"));
-    newAction->setShortcut(QKeySequence::New);
-    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
-
-    auto *openAction = fileMenu->addAction(tr("&Open..."));
-    openAction->setShortcut(QKeySequence::Open);
-    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
-
-    auto *saveAction = fileMenu->addAction(tr("&Save"));
-    saveAction->setShortcut(QKeySequence::Save);
-    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
-
-    auto *saveAsAction = fileMenu->addAction(tr("Save &As..."));
-    saveAsAction->setShortcut(QKeySequence::SaveAs);
-    connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveFileAs);
-
+    fileMenu->addAction(m_newAction);
+    fileMenu->addAction(m_openAction);
+    fileMenu->addAction(m_saveAction);
+    fileMenu->addAction(m_saveAsAction);
     fileMenu->addSeparator();
-
-    auto *quitAction = fileMenu->addAction(tr("&Quit"));
-    quitAction->setShortcut(QKeySequence::Quit);
-    connect(quitAction, &QAction::triggered, this, &QWidget::close);
+    fileMenu->addAction(m_preferencesAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(m_quitAction);
 
     auto *buildMenu = menuBar()->addMenu(tr("&Build"));
-    auto *compileAction = buildMenu->addAction(tr("&Compile"));
-    compileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
-    connect(compileAction, &QAction::triggered, this, &MainWindow::compileFile);
+    buildMenu->addAction(m_compileAction);
 
     auto *runMenu = menuBar()->addMenu(tr("&Run"));
-    auto *runAction = runMenu->addAction(tr("&Run"));
-    runAction->setShortcut(QKeySequence(Qt::Key_F5));
-    connect(runAction, &QAction::triggered, this, &MainWindow::runFile);
+    runMenu->addAction(m_runAction);
+}
+
+void MainWindow::createToolBar()
+{
+    auto *toolBar = addToolBar(tr("Main"));
+    toolBar->setMovable(false);
+    toolBar->addAction(m_newAction);
+    toolBar->addAction(m_openAction);
+    toolBar->addAction(m_saveAction);
+    toolBar->addSeparator();
+    toolBar->addAction(m_compileAction);
+    toolBar->addAction(m_runAction);
+}
+
+void MainWindow::applyToolchainPaths()
+{
+    m_compiler->setCompilerPath(ToolchainSettings::resolveCompilerPath());
+    m_vm->setVmPath(ToolchainSettings::resolveVmPath());
+    updateToolchainStatus();
+}
+
+void MainWindow::updateToolchainStatus()
+{
+    const QString compiler = m_compiler->compilerPath();
+    const QString vm = m_vm->vmPath();
+    const QString text =
+        tr("Compiler: %1 | VM: %2")
+            .arg(QFileInfo(compiler).fileName(), QFileInfo(vm).fileName());
+    statusBar()->showMessage(text);
+    statusBar()->setToolTip(tr("Compiler: %1\nVM: %2").arg(compiler, vm));
+}
+
+void MainWindow::openPreferences()
+{
+    SettingsDialog dialog(this);
+    dialog.setCompilerPath(ToolchainSettings::storedCompilerPath());
+    dialog.setVmPath(ToolchainSettings::storedVmPath());
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    ToolchainSettings::save(dialog.compilerPath(), dialog.vmPath());
+    applyToolchainPaths();
 }
 
 void MainWindow::updateWindowTitle()
