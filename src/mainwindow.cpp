@@ -104,6 +104,7 @@ void MainWindow::createActions()
 
     m_compileAction = new QAction(tr("&Compile"), this);
     m_compileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
+    m_compileAction->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
     connect(m_compileAction, &QAction::triggered, this, &MainWindow::compileFile);
 
     m_runAction = new QAction(tr("&Run"), this);

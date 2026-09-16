@@ -59,8 +59,8 @@ the **Implementation status** section when closed.
 **Deliverables**
 
 - **Run** uses a Play-style icon (`QStyle::SP_MediaPlay` or equivalent).
-- **Compile** does not use Play; prefer no icon, a neutral standard icon, or a later custom
-  build/hammer asset under `resources/icons/` if added in this stage.
+- **Compile** does not use Play; temporarily uses `QStyle::SP_MediaSeekForward` until a
+  custom build/hammer asset is added under `resources/icons/`.
 - New / Open / Save icons unchanged unless they conflict.
 
 **Acceptance criteria**
