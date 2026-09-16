@@ -10,9 +10,11 @@ prefixes sort lexicographically).
 
 - [Milestone 0 — Project skeleton (completed)](milestones/00-project-skeleton.md)
 - [Milestone 1 — End-to-end edit → compile → run (completed)](milestones/01-end-to-end-mvp.md)
+- [Milestone 2 — Editor polish](milestones/02-editor-polish.md)
+- [Milestone 3 — Editor tabs](milestones/03-editor-tabs.md)
 
-**Release checkpoint:** Milestone 1 is complete. The application reports `0.1.0`; cut git
-tag `v0.1.0` when ready (see the Milestone 1 detail page).
+**Release checkpoint:** Milestone 1 is complete. The application reports `0.1.0`; tag
+`v0.1.0` when cut.
 
-**Next up:** Post-M1 features such as syntax highlighting, project/workspace support,
-debugging, and multi-file builds (see Planned Features in the root README).
+**Next up:** Milestone 2 improves editor craft (toolbar icons, Pascal highlighting, line
+numbers). Milestone 3 adds multi-document tabs on top of that editor.
