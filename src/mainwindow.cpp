@@ -104,12 +104,11 @@ void MainWindow::createActions()
 
     m_compileAction = new QAction(tr("&Compile"), this);
     m_compileAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
-    m_compileAction->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     connect(m_compileAction, &QAction::triggered, this, &MainWindow::compileFile);
 
     m_runAction = new QAction(tr("&Run"), this);
     m_runAction->setShortcut(QKeySequence(Qt::Key_F5));
-    m_runAction->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+    m_runAction->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     connect(m_runAction, &QAction::triggered, this, &MainWindow::runFile);
 }
 

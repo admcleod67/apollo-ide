@@ -52,7 +52,7 @@ the **Implementation status** section when closed.
 
 ## Staged delivery plan
 
-### Stage 1 — Toolbar icon conventions (M2a)
+### Stage 1 — Toolbar icon conventions (M2a) — completed
 
 **Objective:** Make toolbar icons match common IDE expectations.
 
@@ -65,9 +65,9 @@ the **Implementation status** section when closed.
 
 **Acceptance criteria**
 
-- [ ] Run toolbar button visually reads as “run/play”
-- [ ] Compile is visually distinct from Run
-- [ ] Shortcuts and menu labels unchanged
+- [x] Run toolbar button visually reads as “run/play”
+- [x] Compile is visually distinct from Run
+- [x] Shortcuts and menu labels unchanged
 
 ---
 
@@ -149,7 +149,7 @@ EditorWidget
 
 | Slice | Status |
 |-------|--------|
-| M2a — Toolbar icon conventions | Not started |
+| M2a — Toolbar icon conventions | Completed |
 | M2b — Pascal syntax highlighting | Not started |
 | M2c — Line numbers | Not started |
 | M2d — Find + close-out | Not started |
