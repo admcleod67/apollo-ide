@@ -117,21 +117,21 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 4 — Find + close-out (M2d)
+### Stage 4 — Find + close-out (M2d) — completed
 
 **Objective:** Finish editor polish and close the milestone.
 
 **Deliverables**
 
-- Basic find-in-document (Ctrl+F / Cmd+F) if it fits cleanly; otherwise defer explicitly
+- Basic find-in-document (Ctrl+F / Cmd+F) via Edit → Find and an in-editor find bar
 - README / milestone docs updated; Implementation status completed
 - Version bump policy: report `0.2.0` when M2 closes (tag `v0.2.0` as a separate release
   step)
 
 **Acceptance criteria**
 
-- [ ] M2a–M2c acceptance criteria met
-- [ ] Milestone 2 marked completed in [`docs/milestones.md`](../milestones.md)
+- [x] M2a–M2c acceptance criteria met
+- [x] Milestone 2 marked completed in [`docs/milestones.md`](../milestones.md)
 
 ---
 
@@ -157,7 +157,7 @@ EditorWidget
 | M2a — Toolbar icon conventions | Completed |
 | M2b — Pascal syntax highlighting | Completed |
 | M2c — Line numbers | Completed |
-| M2d — Find + close-out | Not started |
+| M2d — Find + close-out | Completed |
 
 ---
 

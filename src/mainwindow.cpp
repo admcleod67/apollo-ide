@@ -93,6 +93,10 @@ void MainWindow::createActions()
     m_saveAsAction->setShortcut(QKeySequence::SaveAs);
     connect(m_saveAsAction, &QAction::triggered, this, &MainWindow::saveFileAs);
 
+    m_findAction = new QAction(tr("&Find..."), this);
+    m_findAction->setShortcut(QKeySequence::Find);
+    connect(m_findAction, &QAction::triggered, this, &MainWindow::findInDocument);
+
     m_preferencesAction = new QAction(tr("&Preferences..."), this);
     m_preferencesAction->setMenuRole(QAction::PreferencesRole);
     connect(m_preferencesAction, &QAction::triggered, this, &MainWindow::openPreferences);
@@ -124,6 +128,9 @@ void MainWindow::createMenus()
     fileMenu->addAction(m_preferencesAction);
     fileMenu->addSeparator();
     fileMenu->addAction(m_quitAction);
+
+    auto *editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(m_findAction);
 
     auto *buildMenu = menuBar()->addMenu(tr("&Build"));
     buildMenu->addAction(m_compileAction);
@@ -299,6 +306,11 @@ void MainWindow::saveFile()
 void MainWindow::saveFileAs()
 {
     saveDocumentAs();
+}
+
+void MainWindow::findInDocument()
+{
+    m_editor->showFind();
 }
 
 void MainWindow::compileFile()

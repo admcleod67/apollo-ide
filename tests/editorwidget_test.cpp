@@ -15,6 +15,8 @@ private slots:
     void newFileClearsPathAndContent();
     void saveWithoutPathFails();
     void lineNumberAreaWidthGrowsWithLineCount();
+    void findNextSelectsMatch();
+    void findMissReturnsFalse();
 };
 
 void EditorWidgetTest::newFileIsCleanAndUntitled()
@@ -110,6 +112,24 @@ void EditorWidgetTest::lineNumberAreaWidthGrowsWithLineCount()
     editor.setContent(manyLines, true);
 
     QVERIFY(editor.lineNumberAreaWidth() > singleDigitWidth);
+}
+
+void EditorWidgetTest::findNextSelectsMatch()
+{
+    EditorWidget editor;
+    editor.setContent(QStringLiteral("program Hello;\nbegin\nend."), false);
+    editor.setFindQuery(QStringLiteral("begin"));
+    QVERIFY(editor.findNext());
+    QCOMPARE(editor.selectedText(), QStringLiteral("begin"));
+}
+
+void EditorWidgetTest::findMissReturnsFalse()
+{
+    EditorWidget editor;
+    editor.setContent(QStringLiteral("program Hello;"), false);
+    editor.setFindQuery(QStringLiteral("writeln"));
+    QVERIFY(!editor.findNext());
+    QVERIFY(editor.selectedText().isEmpty());
 }
 
 QTEST_MAIN(EditorWidgetTest)

@@ -10,7 +10,7 @@ The IDE is designed to evolve iteratively and incrementally alongside the compil
 
 ## Current Status
 
-**Milestone 1 (0.1.0)** is complete. The MVP provides:
+**Milestone 2 (0.2.0)** is complete. The IDE provides:
 
 - Creation and editing of Pascal source files
 - Saving and loading files
@@ -18,8 +18,10 @@ The IDE is designed to evolve iteratively and incrementally alongside the compil
 - Running compiled Gemini bytecode on the Gemini VM
 - Displaying compiler diagnostics and runtime output
 - Preferences for toolchain paths, plus a toolbar for common actions
+- Pascal syntax highlighting, line numbers, and find-in-document (Ctrl+F / Cmd+F)
 
-Future versions will expand on this foundation with project management, syntax highlighting, debugging support, multi-file builds, and additional language front-ends.
+Future versions will expand on this foundation with project management, debugging support,
+multi-file builds, editor tabs, and additional language front-ends.
 
 ## Goals
 
@@ -49,7 +51,7 @@ This separation ensures that the IDE remains flexible, portable, and language-ag
 
 ## Planned Features
 
-- Pascal syntax highlighting
+- Editor tabs / multi-document editing
 - Project/workspace support
 - Build pipelines for multi-file programs
 - Integrated Gemini VM debugger

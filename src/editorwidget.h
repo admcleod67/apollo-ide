@@ -5,6 +5,8 @@
 
 class LineNumberArea;
 class PascalHighlighter;
+class QEvent;
+class QLineEdit;
 
 class CodeEditor : public QPlainTextEdit
 {
@@ -39,6 +41,7 @@ public:
     [[nodiscard]] bool isDirty() const;
     [[nodiscard]] QString filePath() const;
     [[nodiscard]] QString toPlainText() const;
+    [[nodiscard]] QString selectedText() const;
     [[nodiscard]] int lineNumberAreaWidth() const;
 
     void newFile();
@@ -49,15 +52,27 @@ public:
     /** Set editor content. When markDirty is true, the document is marked modified. */
     void setContent(const QString &text, bool markDirty = true);
 
+    void showFind();
+    void hideFind();
+    void setFindQuery(const QString &query);
+    bool findNext();
+    bool findPrevious();
+
 signals:
     void documentChanged();
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     void setFilePath(const QString &path);
     void setModified(bool modified);
     void emitDocumentChanged();
+    bool findWithWrap(bool backward);
 
     CodeEditor *m_editor = nullptr;
     PascalHighlighter *m_highlighter = nullptr;
+    QWidget *m_findBar = nullptr;
+    QLineEdit *m_findEdit = nullptr;
     QString m_filePath;
 };

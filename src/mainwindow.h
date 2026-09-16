@@ -37,6 +37,7 @@ private:
     void openFile();
     void saveFile();
     void saveFileAs();
+    void findInDocument();
     void compileFile();
     void runFile();
 
@@ -61,6 +62,7 @@ private:
     QAction *m_openAction = nullptr;
     QAction *m_saveAction = nullptr;
     QAction *m_saveAsAction = nullptr;
+    QAction *m_findAction = nullptr;
     QAction *m_preferencesAction = nullptr;
     QAction *m_quitAction = nullptr;
     QAction *m_compileAction = nullptr;
