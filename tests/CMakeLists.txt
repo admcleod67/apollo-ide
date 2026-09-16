@@ -4,6 +4,8 @@ add_executable(editorwidget_test
     editorwidget_test.cpp
     ../src/editorwidget.cpp
     ../src/editorwidget.h
+    ../src/pascalhighlighter.cpp
+    ../src/pascalhighlighter.h
 )
 
 target_include_directories(editorwidget_test PRIVATE
@@ -16,6 +18,23 @@ target_link_libraries(editorwidget_test PRIVATE
 )
 
 add_test(NAME editorwidget_test COMMAND editorwidget_test)
+
+add_executable(pascalhighlighter_test
+    pascalhighlighter_test.cpp
+    ../src/pascalhighlighter.cpp
+    ../src/pascalhighlighter.h
+)
+
+target_include_directories(pascalhighlighter_test PRIVATE
+    "${CMAKE_SOURCE_DIR}/src"
+)
+
+target_link_libraries(pascalhighlighter_test PRIVATE
+    Qt6::Widgets
+    Qt6::Test
+)
+
+add_test(NAME pascalhighlighter_test COMMAND pascalhighlighter_test)
 
 add_executable(compileradapter_test
     compileradapter_test.cpp

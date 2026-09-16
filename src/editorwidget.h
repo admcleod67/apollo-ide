@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+class PascalHighlighter;
 class QPlainTextEdit;
 
 class EditorWidget : public QWidget
@@ -32,5 +33,6 @@ private:
     void emitDocumentChanged();
 
     QPlainTextEdit *m_editor = nullptr;
+    PascalHighlighter *m_highlighter = nullptr;
     QString m_filePath;
 };

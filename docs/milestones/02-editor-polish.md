@@ -71,16 +71,22 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 2 — Pascal syntax highlighting (M2b)
+### Stage 2 — Pascal syntax highlighting (M2b) — completed
 
 **Objective:** Colour Pascal source in the editor.
 
 **Deliverables**
 
 - A `PascalHighlighter` (`QSyntaxHighlighter`) attached to the editor document
-- Highlight at least: keywords, line/block comments, string literals, numbers
+- Highlight at least: keywords, block comments (`{…}`, `(*…*)`), string literals, numbers
 - Keyword set sufficient for Apollo Pascal as used today (extendable list)
 - Sensible default colours that work on the default light palette (theme system later)
+
+**Implementation notes**
+
+- Highlighting is **always-on** with Pascal lexical rules for every editor buffer (Apollo’s
+  primary language). Plain text still edits normally; colours simply follow Pascal rules.
+- Colour schemes are not user-configurable yet.
 
 **Out of scope for Stage 2**
 
@@ -89,10 +95,9 @@ the **Implementation status** section when closed.
 
 **Acceptance criteria**
 
-- [ ] Opening a `.pas` example shows highlighted keywords and comments
-- [ ] Editing and undo keep highlighting consistent
-- [ ] Non-Pascal / plain buffers remain usable (highlighter on by default for `.pas`, or
-      always-on with Pascal rules — document the choice)
+- [x] Opening a `.pas` example shows highlighted keywords and comments
+- [x] Editing and undo keep highlighting consistent
+- [x] Non-Pascal / plain buffers remain usable (always-on Pascal rules — documented above)
 
 ---
 
@@ -150,7 +155,7 @@ EditorWidget
 | Slice | Status |
 |-------|--------|
 | M2a — Toolbar icon conventions | Completed |
-| M2b — Pascal syntax highlighting | Not started |
+| M2b — Pascal syntax highlighting | Completed |
 | M2c — Line numbers | Not started |
 | M2d — Find + close-out | Not started |
 

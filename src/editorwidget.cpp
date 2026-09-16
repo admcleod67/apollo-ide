@@ -1,5 +1,7 @@
 #include "editorwidget.h"
 
+#include "pascalhighlighter.h"
+
 #include <QFile>
 #include <QFontDatabase>
 #include <QPlainTextEdit>
@@ -12,6 +14,7 @@ EditorWidget::EditorWidget(QWidget *parent)
 {
     m_editor->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     m_editor->setLineWrapMode(QPlainTextEdit::NoWrap);
+    m_highlighter = new PascalHighlighter(m_editor->document());
 
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);

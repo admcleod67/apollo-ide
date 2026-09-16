@@ -28,6 +28,8 @@ add_executable(apollo-ide
     src/mainwindow.h
     src/editorwidget.cpp
     src/editorwidget.h
+    src/pascalhighlighter.cpp
+    src/pascalhighlighter.h
     src/compileradapter.cpp
     src/compileradapter.h
     src/vmadapter.cpp
