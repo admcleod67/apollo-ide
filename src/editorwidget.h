@@ -1,9 +1,33 @@
 #pragma once
 
+#include <QPlainTextEdit>
 #include <QWidget>
 
+class LineNumberArea;
 class PascalHighlighter;
-class QPlainTextEdit;
+
+class CodeEditor : public QPlainTextEdit
+{
+    Q_OBJECT
+    friend class LineNumberArea;
+
+public:
+    explicit CodeEditor(QWidget *parent = nullptr);
+
+    [[nodiscard]] int lineNumberAreaWidth() const;
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
+private slots:
+    void updateLineNumberAreaWidth(int newBlockCount);
+    void updateLineNumberArea(const QRect &rect, int dy);
+
+private:
+    void lineNumberAreaPaintEvent(QPaintEvent *event);
+
+    LineNumberArea *m_lineNumberArea = nullptr;
+};
 
 class EditorWidget : public QWidget
 {
@@ -15,6 +39,7 @@ public:
     [[nodiscard]] bool isDirty() const;
     [[nodiscard]] QString filePath() const;
     [[nodiscard]] QString toPlainText() const;
+    [[nodiscard]] int lineNumberAreaWidth() const;
 
     void newFile();
     bool loadFile(const QString &path);
@@ -32,7 +57,7 @@ private:
     void setModified(bool modified);
     void emitDocumentChanged();
 
-    QPlainTextEdit *m_editor = nullptr;
+    CodeEditor *m_editor = nullptr;
     PascalHighlighter *m_highlighter = nullptr;
     QString m_filePath;
 };

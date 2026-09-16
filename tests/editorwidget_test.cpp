@@ -14,6 +14,7 @@ private slots:
     void saveClearsDirtyAndEditDirtiesAgain();
     void newFileClearsPathAndContent();
     void saveWithoutPathFails();
+    void lineNumberAreaWidthGrowsWithLineCount();
 };
 
 void EditorWidgetTest::newFileIsCleanAndUntitled()
@@ -95,6 +96,20 @@ void EditorWidgetTest::saveWithoutPathFails()
     editor.setContent(QStringLiteral("x"), true);
     QVERIFY(!editor.save());
     QVERIFY(editor.isDirty());
+}
+
+void EditorWidgetTest::lineNumberAreaWidthGrowsWithLineCount()
+{
+    EditorWidget editor;
+    const int singleDigitWidth = editor.lineNumberAreaWidth();
+
+    QString manyLines;
+    for (int i = 0; i < 100; ++i) {
+        manyLines += QStringLiteral("line %1\n").arg(i);
+    }
+    editor.setContent(manyLines, true);
+
+    QVERIFY(editor.lineNumberAreaWidth() > singleDigitWidth);
 }
 
 QTEST_MAIN(EditorWidgetTest)

@@ -101,7 +101,7 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 3 — Line numbers (M2c)
+### Stage 3 — Line numbers (M2c) — completed
 
 **Objective:** Show 1-based line numbers beside the editor.
 
@@ -112,8 +112,8 @@ the **Implementation status** section when closed.
 
 **Acceptance criteria**
 
-- [ ] Line numbers match editor lines for a multi-line file
-- [ ] Scrolling keeps gutter aligned
+- [x] Line numbers match editor lines for a multi-line file
+- [x] Scrolling keeps gutter aligned
 
 ---
 
@@ -156,7 +156,7 @@ EditorWidget
 |-------|--------|
 | M2a — Toolbar icon conventions | Completed |
 | M2b — Pascal syntax highlighting | Completed |
-| M2c — Line numbers | Not started |
+| M2c — Line numbers | Completed |
 | M2d — Find + close-out | Not started |
 
 ---
