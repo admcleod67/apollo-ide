@@ -88,7 +88,7 @@ This structure will expand as new features are introduced.
 - Gemini VM (`gemini-vm` from pick-system / gemini-system) on `PATH`, or set
   `APOLLO_VM` to its full path — required to run from the IDE
 - Gemini modules directory (from gemini-system) via Preferences or `APOLLO_MODULES` —
-  required to run programs that need maths or I/O modules
+  optional for Run; needed for programs that use maths or I/O modules
 
 ## Toolchain configuration
 
@@ -105,12 +105,13 @@ Resolution order for the Gemini modules directory:
 
 1. Environment variable `APOLLO_MODULES`, if set
 2. Path saved in Preferences
-3. Unset (Run fails with a clear error until configured)
+3. Unset (Run omits `--modules`; the VM may still use its own defaults)
 
 Environment variables override Preferences (useful for CLion run configurations and CI).
 
 Compile uses `apolloc --tbc <source> -o <sibling.tbc>`. Run uses
-`gemini-vm --modules <dir> <tbc>`.
+`gemini-vm --modules <dir> <tbc>` when modules are configured, otherwise
+`gemini-vm <tbc>`.
 
 ## Building
 
@@ -138,8 +139,8 @@ export APOLLO_MODULES=/path/to/gemini/modules
 
 Open a `.pas` file and use the toolbar or **Build → Compile** (Ctrl+B / Cmd+B) /
 **Run → Run** (F5). Run compiles first, then executes the sibling `.tbc` with
-`gemini-vm --modules …` when compile succeeds. Compiler and runtime output appear on
-separate tabs.
+`gemini-vm` (passing `--modules` when configured) when compile succeeds. Compiler and
+runtime output appear on separate tabs.
 
 On macOS with Homebrew Qt, CMake normally finds Qt 6 automatically. If configure
 fails to locate Qt, pass the prefix explicitly:

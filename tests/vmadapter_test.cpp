@@ -16,7 +16,7 @@ private slots:
     void runSuccessCapturesStdout();
     void runFailureCapturesStderr();
     void missingVmFailsToStart();
-    void missingModulesPathFailsWithoutStarting();
+    void emptyModulesPathRunsWithoutModulesFlag();
 
 private:
     QString m_successVm;
@@ -133,7 +133,7 @@ void VmAdapterTest::missingVmFailsToStart()
     QCOMPARE(finishedSpy.count(), 0);
 }
 
-void VmAdapterTest::missingModulesPathFailsWithoutStarting()
+void VmAdapterTest::emptyModulesPathRunsWithoutModulesFlag()
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -147,17 +147,22 @@ void VmAdapterTest::missingModulesPathFailsWithoutStarting()
 
     VmAdapter adapter;
     adapter.setVmPath(m_successVm);
-    // modules path left empty
+    // modules path left empty — Run still launches gemini-vm without --modules
 
     QSignalSpy startedSpy(&adapter, &VmAdapter::runStarted);
     QSignalSpy finishedSpy(&adapter, &VmAdapter::runFinished);
     QSignalSpy failedSpy(&adapter, &VmAdapter::runFailedToStart);
 
     adapter.runBytecode(tbcPath);
-    QCOMPARE(failedSpy.count(), 1);
-    QVERIFY(failedSpy.takeFirst().at(0).toString().contains(QStringLiteral("modules")));
-    QCOMPARE(startedSpy.count(), 0);
-    QCOMPARE(finishedSpy.count(), 0);
+    QVERIFY(finishedSpy.wait(5000));
+    QCOMPARE(startedSpy.count(), 1);
+    QCOMPARE(failedSpy.count(), 0);
+    QCOMPARE(finishedSpy.count(), 1);
+
+    const QList<QVariant> args = finishedSpy.takeFirst();
+    QVERIFY(args.at(0).toBool());
+    QVERIFY(args.at(1).toString().contains(QStringLiteral("Hello, world")));
+    QCOMPARE(args.at(3).toInt(), 0);
 }
 
 QTEST_MAIN(VmAdapterTest)

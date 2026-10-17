@@ -26,7 +26,7 @@ It complements:
 ### Goals
 
 - Compile with `apolloc --tbc … -o …` so the sibling `.tbc` is produced by the compiler.
-- Run with `gemini-vm --modules <dir> …` so maths and I/O modules load correctly.
+- Run with `gemini-vm [--modules <dir>] …` so maths and I/O modules load when configured.
 - Configure the modules directory via Preferences and/or environment, consistent with
   existing compiler/VM path resolution.
 - Keep the M1–M3 edit → compile → run UX (active tab) unchanged aside from toolchain args.
@@ -94,17 +94,17 @@ superseded; the compiler writes the artifact via `-o`.
 - Modules directory resolution (same order as compiler/VM binaries):
   1. Environment variable `APOLLO_MODULES` if set
   2. Path saved in Preferences storage (`toolchain/modulesPath`)
-  3. No silent default — Run requires a configured modules dir (clear error if missing)
+  3. Unset — Run still launches the VM without `--modules` (maths/I/O may fail at runtime)
 - [`VmAdapter`](../../src/vmadapter.cpp) invokes  
-  `gemini-vm --modules <dir> <tbcPath>`
+  `gemini-vm --modules <dir> <tbcPath>` when configured, otherwise `gemini-vm <tbcPath>`
 - [`ToolchainSettings`](../../src/toolchainsettings.cpp) stores/resolves the modules path
 - Main window applies the resolved path when configuring the VM adapter
 - Tests for resolution order and VM argument list
 
 **Acceptance criteria**
 
-- [x] Run passes `--modules` with the resolved directory
-- [x] Missing modules path yields a clear Runtime (or status) error without a bare VM launch
+- [x] Run passes `--modules` with the resolved directory when set
+- [x] Missing modules path omits `--modules` and still starts the VM
 - [x] `APOLLO_MODULES` overrides a saved Preferences path
 
 ---
@@ -135,7 +135,7 @@ superseded; the compiler writes the artifact via `-o`.
 MainWindow
   ├── ToolchainSettings     // compiler, VM, modules paths (+ env overrides)
   ├── CompilerAdapter       // apolloc --tbc source -o sibling.tbc
-  └── VmAdapter             // gemini-vm --modules <dir> program.tbc
+  └── VmAdapter             // gemini-vm [--modules <dir>] program.tbc
 ```
 
 - Keep adapters UI-agnostic; `MainWindow` / settings resolve paths and push them in.
@@ -157,5 +157,5 @@ MainWindow
 ## Exit
 
 Milestone 4 is complete when Stages 1–3 acceptance criteria are met: the IDE compiles with
-`apolloc --tbc … -o …`, runs with `gemini-vm --modules …`, and users can configure the
-modules directory via Preferences or `APOLLO_MODULES`.
+`apolloc --tbc … -o …`, runs with `gemini-vm` (optionally `--modules …`), and users can
+configure the modules directory via Preferences or `APOLLO_MODULES`.

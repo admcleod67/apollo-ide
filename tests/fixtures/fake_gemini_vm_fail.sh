@@ -1,15 +1,13 @@
 #!/bin/sh
-# Fake gemini-vm that fails: requires --modules <dir> <tbc>, error on stderr, exit 1.
+# Fake gemini-vm that fails: requires <tbc>; accepts optional --modules <dir>; error on stderr, exit 1.
 set -e
 
-modules=
 tbc=
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --modules)
             shift
             [ "$#" -gt 0 ] || exit 2
-            modules=$1
             shift
             ;;
         *)
@@ -19,8 +17,8 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-if [ -z "$modules" ] || [ -z "$tbc" ]; then
-    echo "error: fake_gemini_vm_fail.sh requires --modules <dir> <tbc>" >&2
+if [ -z "$tbc" ]; then
+    echo "error: fake_gemini_vm_fail.sh requires <tbc>" >&2
     exit 2
 fi
 
