@@ -52,6 +52,8 @@ This separation ensures that the IDE remains flexible, portable, and language-ag
 
 ## Planned Features
 
+- Toolchain modules support for maths and I/O (`apolloc --tbc`, `gemini-vm --modules`) —
+  see [Milestone 4](docs/milestones/04-toolchain-modules.md)
 - Project/workspace support
 - Build pipelines for multi-file programs
 - Integrated Gemini VM debugger

@@ -60,4 +60,5 @@ services may come later once CLI integration is proven.
 - [Milestone 1 — End-to-end edit → compile → run](milestones/01-end-to-end-mvp.md)
 - [Milestone 2 — Editor polish](milestones/02-editor-polish.md)
 - [Milestone 3 — Editor tabs](milestones/03-editor-tabs.md)
+- [Milestone 4 — Toolchain modules (maths & I/O)](milestones/04-toolchain-modules.md)
 - Sister projects: `apollo-compiler`, `gemini-system` (sibling repositories)
