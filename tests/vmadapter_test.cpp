@@ -1,5 +1,6 @@
 #include "vmadapter.h"
 
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QSignalSpy>
@@ -15,6 +16,7 @@ private slots:
     void runSuccessCapturesStdout();
     void runFailureCapturesStderr();
     void missingVmFailsToStart();
+    void missingModulesPathFailsWithoutStarting();
 
 private:
     QString m_successVm;
@@ -39,6 +41,9 @@ void VmAdapterTest::runSuccessCapturesStdout()
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
+    const QString modulesDir = dir.filePath(QStringLiteral("modules"));
+    QVERIFY(QDir().mkpath(modulesDir));
+
     const QString tbcPath = dir.filePath(QStringLiteral("hello.tbc"));
     {
         QFile tbc(tbcPath);
@@ -48,6 +53,7 @@ void VmAdapterTest::runSuccessCapturesStdout()
 
     VmAdapter adapter;
     adapter.setVmPath(m_successVm);
+    adapter.setModulesPath(modulesDir);
 
     QSignalSpy startedSpy(&adapter, &VmAdapter::runStarted);
     QSignalSpy finishedSpy(&adapter, &VmAdapter::runFinished);
@@ -70,6 +76,9 @@ void VmAdapterTest::runFailureCapturesStderr()
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
+    const QString modulesDir = dir.filePath(QStringLiteral("modules"));
+    QVERIFY(QDir().mkpath(modulesDir));
+
     const QString tbcPath = dir.filePath(QStringLiteral("bad.tbc"));
     {
         QFile tbc(tbcPath);
@@ -79,6 +88,7 @@ void VmAdapterTest::runFailureCapturesStderr()
 
     VmAdapter adapter;
     adapter.setVmPath(m_failVm);
+    adapter.setModulesPath(modulesDir);
 
     QSignalSpy finishedSpy(&adapter, &VmAdapter::runFinished);
     QSignalSpy failedSpy(&adapter, &VmAdapter::runFailedToStart);
@@ -99,6 +109,9 @@ void VmAdapterTest::missingVmFailsToStart()
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
+    const QString modulesDir = dir.filePath(QStringLiteral("modules"));
+    QVERIFY(QDir().mkpath(modulesDir));
+
     const QString tbcPath = dir.filePath(QStringLiteral("hello.tbc"));
     {
         QFile tbc(tbcPath);
@@ -108,6 +121,7 @@ void VmAdapterTest::missingVmFailsToStart()
 
     VmAdapter adapter;
     adapter.setVmPath(dir.filePath(QStringLiteral("no-such-gemini-vm")));
+    adapter.setModulesPath(modulesDir);
 
     QSignalSpy finishedSpy(&adapter, &VmAdapter::runFinished);
     QSignalSpy failedSpy(&adapter, &VmAdapter::runFailedToStart);
@@ -116,6 +130,33 @@ void VmAdapterTest::missingVmFailsToStart()
     QVERIFY(failedSpy.wait(5000));
     QCOMPARE(failedSpy.count(), 1);
     QVERIFY(failedSpy.takeFirst().at(0).toString().contains(QStringLiteral("Failed to start")));
+    QCOMPARE(finishedSpy.count(), 0);
+}
+
+void VmAdapterTest::missingModulesPathFailsWithoutStarting()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString tbcPath = dir.filePath(QStringLiteral("hello.tbc"));
+    {
+        QFile tbc(tbcPath);
+        QVERIFY(tbc.open(QIODevice::WriteOnly | QIODevice::Text));
+        tbc.write("LINE 1\n");
+    }
+
+    VmAdapter adapter;
+    adapter.setVmPath(m_successVm);
+    // modules path left empty
+
+    QSignalSpy startedSpy(&adapter, &VmAdapter::runStarted);
+    QSignalSpy finishedSpy(&adapter, &VmAdapter::runFinished);
+    QSignalSpy failedSpy(&adapter, &VmAdapter::runFailedToStart);
+
+    adapter.runBytecode(tbcPath);
+    QCOMPARE(failedSpy.count(), 1);
+    QVERIFY(failedSpy.takeFirst().at(0).toString().contains(QStringLiteral("modules")));
+    QCOMPARE(startedSpy.count(), 0);
     QCOMPARE(finishedSpy.count(), 0);
 }
 

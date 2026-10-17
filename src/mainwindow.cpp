@@ -313,6 +313,7 @@ void MainWindow::applyToolchainPaths()
 {
     m_compiler->setCompilerPath(ToolchainSettings::resolveCompilerPath());
     m_vm->setVmPath(ToolchainSettings::resolveVmPath());
+    m_vm->setModulesPath(ToolchainSettings::resolveModulesPath());
     updateToolchainStatus();
 }
 
@@ -320,11 +321,16 @@ void MainWindow::updateToolchainStatus()
 {
     const QString compiler = m_compiler->compilerPath();
     const QString vm = m_vm->vmPath();
+    const QString modules = m_vm->modulesPath();
+    const QString modulesLabel =
+        modules.isEmpty() ? tr("(unset)") : QFileInfo(modules).fileName();
     const QString text =
-        tr("Compiler: %1 | VM: %2")
-            .arg(QFileInfo(compiler).fileName(), QFileInfo(vm).fileName());
+        tr("Compiler: %1 | VM: %2 | Modules: %3")
+            .arg(QFileInfo(compiler).fileName(), QFileInfo(vm).fileName(), modulesLabel);
     statusBar()->showMessage(text);
-    statusBar()->setToolTip(tr("Compiler: %1\nVM: %2").arg(compiler, vm));
+    statusBar()->setToolTip(
+        tr("Compiler: %1\nVM: %2\nModules: %3")
+            .arg(compiler, vm, modules.isEmpty() ? tr("(unset)") : modules));
 }
 
 void MainWindow::openPreferences()
@@ -336,7 +342,9 @@ void MainWindow::openPreferences()
         return;
     }
 
-    ToolchainSettings::save(dialog.compilerPath(), dialog.vmPath());
+    // Preserve modules path until M4c adds a Preferences field.
+    ToolchainSettings::save(dialog.compilerPath(), dialog.vmPath(),
+                            ToolchainSettings::storedModulesPath());
     applyToolchainPaths();
 }
 

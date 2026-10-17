@@ -15,6 +15,10 @@ public:
 
     void setVmPath(const QString &path);
     [[nodiscard]] QString vmPath() const;
+
+    void setModulesPath(const QString &path);
+    [[nodiscard]] QString modulesPath() const;
+
     [[nodiscard]] bool isRunning() const;
 
     void runBytecode(const QString &tbcPath);
@@ -29,4 +33,5 @@ private:
 
     QProcess *m_process = nullptr;
     QString m_vmPath;
+    QString m_modulesPath;
 };

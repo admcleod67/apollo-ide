@@ -34,9 +34,8 @@ It complements:
 ### Starting point
 
 Milestone 3 delivers multi-tab editing with Compile/Run on the active document. After
-M4a, compile uses `apolloc --tbc … -o …`. Run still uses the older CLI until M4b:
-
-- Run: `gemini-vm <tbc>` with no `--modules`
+M4a–M4b, compile uses `apolloc --tbc … -o …` and run uses
+`gemini-vm --modules <dir> <tbc>` when a modules path is configured.
 
 ### Out of scope for Milestone 4
 
@@ -86,7 +85,7 @@ superseded; the compiler writes the artifact via `-o`.
 
 ---
 
-### Stage 2 — Modules path + VM CLI (M4b)
+### Stage 2 — Modules path + VM CLI (M4b) — completed
 
 **Objective:** Run bytecode with Gemini modules loaded.
 
@@ -94,20 +93,22 @@ superseded; the compiler writes the artifact via `-o`.
 
 - Modules directory resolution (same order as compiler/VM binaries):
   1. Environment variable `APOLLO_MODULES` if set
-  2. Path saved in Preferences
-  3. No silent default binary name — Run requires a configured modules dir for this
-     milestone (clear error if missing)
+  2. Path saved in Preferences storage (`toolchain/modulesPath`)
+  3. No silent default — Run requires a configured modules dir (clear error if missing)
 - [`VmAdapter`](../../src/vmadapter.cpp) invokes  
   `gemini-vm --modules <dir> <tbcPath>`
 - [`ToolchainSettings`](../../src/toolchainsettings.cpp) stores/resolves the modules path
 - Main window applies the resolved path when configuring the VM adapter
 - Tests for resolution order and VM argument list
 
+**Implementation note:** Until M4c, the modules path is set via `APOLLO_MODULES` or the
+QSettings key; Preferences has no browse field yet.
+
 **Acceptance criteria**
 
-- [ ] Run passes `--modules` with the resolved directory
-- [ ] Missing modules path yields a clear Runtime (or status) error without a bare VM launch
-- [ ] `APOLLO_MODULES` overrides a saved Preferences path
+- [x] Run passes `--modules` with the resolved directory
+- [x] Missing modules path yields a clear Runtime (or status) error without a bare VM launch
+- [x] `APOLLO_MODULES` overrides a saved Preferences path
 
 ---
 
@@ -151,7 +152,7 @@ MainWindow
 | Slice | Status |
 |-------|--------|
 | M4a — Compile CLI (`--tbc` / `-o`) | Completed |
-| M4b — Modules path + VM CLI | Not started |
+| M4b — Modules path + VM CLI | Completed |
 | M4c — Preferences + close-out | Not started |
 
 ---

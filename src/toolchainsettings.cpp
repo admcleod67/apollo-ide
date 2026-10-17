@@ -7,6 +7,7 @@ namespace {
 
 constexpr auto kCompilerKey = "toolchain/compilerPath";
 constexpr auto kVmKey = "toolchain/vmPath";
+constexpr auto kModulesKey = "toolchain/modulesPath";
 
 } // namespace
 
@@ -20,11 +21,18 @@ QString ToolchainSettings::storedVmPath()
     return QSettings().value(QLatin1String(kVmKey)).toString();
 }
 
-void ToolchainSettings::save(const QString &compilerPath, const QString &vmPath)
+QString ToolchainSettings::storedModulesPath()
+{
+    return QSettings().value(QLatin1String(kModulesKey)).toString();
+}
+
+void ToolchainSettings::save(const QString &compilerPath, const QString &vmPath,
+                             const QString &modulesPath)
 {
     QSettings settings;
     settings.setValue(QLatin1String(kCompilerKey), compilerPath);
     settings.setValue(QLatin1String(kVmKey), vmPath);
+    settings.setValue(QLatin1String(kModulesKey), modulesPath);
     settings.sync();
 }
 
@@ -49,4 +57,9 @@ QString ToolchainSettings::resolveCompilerPath()
 QString ToolchainSettings::resolveVmPath()
 {
     return resolvePath(kVmEnv, storedVmPath(), QStringLiteral("gemini-vm"));
+}
+
+QString ToolchainSettings::resolveModulesPath()
+{
+    return resolvePath(kModulesEnv, storedModulesPath(), QString());
 }

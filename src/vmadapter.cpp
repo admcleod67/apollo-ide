@@ -40,6 +40,16 @@ QString VmAdapter::vmPath() const
     return m_vmPath;
 }
 
+void VmAdapter::setModulesPath(const QString &path)
+{
+    m_modulesPath = path;
+}
+
+QString VmAdapter::modulesPath() const
+{
+    return m_modulesPath;
+}
+
 bool VmAdapter::isRunning() const
 {
     return m_process->state() != QProcess::NotRunning;
@@ -51,9 +61,17 @@ void VmAdapter::runBytecode(const QString &tbcPath)
         return;
     }
 
+    if (m_modulesPath.trimmed().isEmpty()) {
+        emit runFailedToStart(
+            tr("Gemini modules directory is not configured. "
+               "Set APOLLO_MODULES or configure it in Preferences."));
+        return;
+    }
+
     const QFileInfo info(tbcPath);
     m_process->setProgram(m_vmPath);
-    m_process->setArguments({tbcPath});
+    m_process->setArguments(
+        {QStringLiteral("--modules"), m_modulesPath, tbcPath});
     m_process->setWorkingDirectory(info.absolutePath());
     m_process->setProcessChannelMode(QProcess::SeparateChannels);
 
