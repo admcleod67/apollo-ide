@@ -101,9 +101,6 @@ superseded; the compiler writes the artifact via `-o`.
 - Main window applies the resolved path when configuring the VM adapter
 - Tests for resolution order and VM argument list
 
-**Implementation note:** Until M4c, the modules path is set via `APOLLO_MODULES` or the
-QSettings key; Preferences has no browse field yet.
-
 **Acceptance criteria**
 
 - [x] Run passes `--modules` with the resolved directory
@@ -112,7 +109,7 @@ QSettings key; Preferences has no browse field yet.
 
 ---
 
-### Stage 3 — Preferences + close-out (M4c)
+### Stage 3 — Preferences + close-out (M4c) — completed
 
 **Objective:** Make modules configuration discoverable and close the milestone.
 
@@ -126,9 +123,9 @@ QSettings key; Preferences has no browse field yet.
 
 **Acceptance criteria**
 
-- [ ] M4a–M4b acceptance criteria met
-- [ ] Milestone 4 marked completed in [`docs/milestones.md`](../milestones.md)
-- [ ] README documents `--tbc` / `--modules` and `APOLLO_MODULES`
+- [x] M4a–M4b acceptance criteria met
+- [x] Milestone 4 marked completed in [`docs/milestones.md`](../milestones.md)
+- [x] README documents `--tbc` / `--modules` and `APOLLO_MODULES`
 
 ---
 
@@ -153,7 +150,7 @@ MainWindow
 |-------|--------|
 | M4a — Compile CLI (`--tbc` / `-o`) | Completed |
 | M4b — Modules path + VM CLI | Completed |
-| M4c — Preferences + close-out | Not started |
+| M4c — Preferences + close-out | Completed |
 
 ---
 

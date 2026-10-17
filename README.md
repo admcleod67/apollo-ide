@@ -10,15 +10,16 @@ The IDE is designed to evolve iteratively and incrementally alongside the compil
 
 ## Current Status
 
-**Milestone 3 (0.3.0)** is complete. The IDE provides:
+**Milestone 4 (0.4.0)** is complete. The IDE provides:
 
 - Creation and editing of Pascal source files
 - Saving and loading files
 - Multiple editor tabs with dirty tracking and close prompts
-- Invoking the Apollo Pascal Compiler
-- Running compiled Gemini bytecode on the Gemini VM
+- Invoking the Apollo Pascal Compiler (`apolloc --tbc … -o …`)
+- Running compiled Gemini bytecode on the Gemini VM with modules
+  (`gemini-vm --modules …`) for maths and I/O
 - Displaying compiler diagnostics and runtime output
-- Preferences for toolchain paths, plus a toolbar for common actions
+- Preferences for compiler, VM, and Gemini modules directory paths
 - Pascal syntax highlighting, line numbers, and find-in-document (Ctrl+F / Cmd+F)
 
 Future versions will expand on this foundation with project management, debugging support,
@@ -52,8 +53,6 @@ This separation ensures that the IDE remains flexible, portable, and language-ag
 
 ## Planned Features
 
-- Toolchain modules support for maths and I/O (`apolloc --tbc`, `gemini-vm --modules`) —
-  see [Milestone 4](docs/milestones/04-toolchain-modules.md)
 - Project/workspace support
 - Build pipelines for multi-file programs
 - Integrated Gemini VM debugger
@@ -88,19 +87,30 @@ This structure will expand as new features are introduced.
   `APOLLO_COMPILER` to its full path — required to compile from the IDE
 - Gemini VM (`gemini-vm` from pick-system / gemini-system) on `PATH`, or set
   `APOLLO_VM` to its full path — required to run from the IDE
+- Gemini modules directory (from gemini-system) via Preferences or `APOLLO_MODULES` —
+  required to run programs that need maths or I/O modules
 
 ## Toolchain configuration
 
 Configure paths in the IDE via **File → Preferences…** (or **Apollo IDE → Preferences**
 on macOS). Saved paths are stored in application settings.
 
-Resolution order for each tool:
+Resolution order for compiler and VM binaries:
 
 1. Environment variable, if set (`APOLLO_COMPILER`, `APOLLO_VM`)
 2. Path saved in Preferences
 3. Default binary name on `PATH` (`apolloc`, `gemini-vm`)
 
+Resolution order for the Gemini modules directory:
+
+1. Environment variable `APOLLO_MODULES`, if set
+2. Path saved in Preferences
+3. Unset (Run fails with a clear error until configured)
+
 Environment variables override Preferences (useful for CLion run configurations and CI).
+
+Compile uses `apolloc --tbc <source> -o <sibling.tbc>`. Run uses
+`gemini-vm --modules <dir> <tbc>`.
 
 ## Building
 
@@ -122,13 +132,14 @@ Optional env overrides:
 ```bash
 export APOLLO_COMPILER=/path/to/apolloc
 export APOLLO_VM=/path/to/gemini-vm
+export APOLLO_MODULES=/path/to/gemini/modules
 ./build/apollo-ide
 ```
 
 Open a `.pas` file and use the toolbar or **Build → Compile** (Ctrl+B / Cmd+B) /
 **Run → Run** (F5). Run compiles first, then executes the sibling `.tbc` with
-`gemini-vm` when compile succeeds. Compiler and runtime output appear on separate
-tabs.
+`gemini-vm --modules …` when compile succeeds. Compiler and runtime output appear on
+separate tabs.
 
 On macOS with Homebrew Qt, CMake normally finds Qt 6 automatically. If configure
 fails to locate Qt, pass the prefix explicitly:

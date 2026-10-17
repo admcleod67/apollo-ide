@@ -338,13 +338,12 @@ void MainWindow::openPreferences()
     SettingsDialog dialog(this);
     dialog.setCompilerPath(ToolchainSettings::storedCompilerPath());
     dialog.setVmPath(ToolchainSettings::storedVmPath());
+    dialog.setModulesPath(ToolchainSettings::storedModulesPath());
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
-    // Preserve modules path until M4c adds a Preferences field.
-    ToolchainSettings::save(dialog.compilerPath(), dialog.vmPath(),
-                            ToolchainSettings::storedModulesPath());
+    ToolchainSettings::save(dialog.compilerPath(), dialog.vmPath(), dialog.modulesPath());
     applyToolchainPaths();
 }
 

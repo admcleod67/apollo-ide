@@ -12,14 +12,17 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
     , m_compilerEdit(new QLineEdit(this))
     , m_vmEdit(new QLineEdit(this))
+    , m_modulesEdit(new QLineEdit(this))
 {
     setWindowTitle(tr("Preferences"));
-    resize(520, 140);
+    resize(560, 180);
 
     auto *compilerBrowse = new QPushButton(tr("Browse…"), this);
     auto *vmBrowse = new QPushButton(tr("Browse…"), this);
+    auto *modulesBrowse = new QPushButton(tr("Browse…"), this);
     connect(compilerBrowse, &QPushButton::clicked, this, &SettingsDialog::browseCompiler);
     connect(vmBrowse, &QPushButton::clicked, this, &SettingsDialog::browseVm);
+    connect(modulesBrowse, &QPushButton::clicked, this, &SettingsDialog::browseModules);
 
     auto *compilerRow = new QHBoxLayout;
     compilerRow->addWidget(m_compilerEdit);
@@ -29,9 +32,14 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     vmRow->addWidget(m_vmEdit);
     vmRow->addWidget(vmBrowse);
 
+    auto *modulesRow = new QHBoxLayout;
+    modulesRow->addWidget(m_modulesEdit);
+    modulesRow->addWidget(modulesBrowse);
+
     auto *form = new QFormLayout;
     form->addRow(tr("Apollo compiler (apolloc)"), compilerRow);
     form->addRow(tr("Gemini VM (gemini-vm)"), vmRow);
+    form->addRow(tr("Gemini modules directory"), modulesRow);
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -52,6 +60,11 @@ QString SettingsDialog::vmPath() const
     return m_vmEdit->text().trimmed();
 }
 
+QString SettingsDialog::modulesPath() const
+{
+    return m_modulesEdit->text().trimmed();
+}
+
 void SettingsDialog::setCompilerPath(const QString &path)
 {
     m_compilerEdit->setText(path);
@@ -60,6 +73,11 @@ void SettingsDialog::setCompilerPath(const QString &path)
 void SettingsDialog::setVmPath(const QString &path)
 {
     m_vmEdit->setText(path);
+}
+
+void SettingsDialog::setModulesPath(const QString &path)
+{
+    m_modulesEdit->setText(path);
 }
 
 void SettingsDialog::browseCompiler()
@@ -77,5 +95,14 @@ void SettingsDialog::browseVm()
         QFileDialog::getOpenFileName(this, tr("Select Gemini VM"), m_vmEdit->text());
     if (!path.isEmpty()) {
         m_vmEdit->setText(path);
+    }
+}
+
+void SettingsDialog::browseModules()
+{
+    const QString path = QFileDialog::getExistingDirectory(
+        this, tr("Select Gemini modules directory"), m_modulesEdit->text());
+    if (!path.isEmpty()) {
+        m_modulesEdit->setText(path);
     }
 }

@@ -12,10 +12,10 @@ prefixes sort lexicographically).
 - [Milestone 1 — End-to-end edit → compile → run (completed)](milestones/01-end-to-end-mvp.md)
 - [Milestone 2 — Editor polish (completed)](milestones/02-editor-polish.md)
 - [Milestone 3 — Editor tabs (completed)](milestones/03-editor-tabs.md)
-- [Milestone 4 — Toolchain modules (maths & I/O)](milestones/04-toolchain-modules.md)
+- [Milestone 4 — Toolchain modules (maths & I/O) (completed)](milestones/04-toolchain-modules.md)
 
-**Release checkpoint:** Milestone 3 is complete. The application reports `0.3.0`; tag
-`v0.3.0` when cut.
+**Release checkpoint:** Milestone 4 is complete. The application reports `0.4.0`; tag
+`v0.4.0` when cut.
 
-**Next up:** Milestone 4 updates compile/run for `apolloc --tbc` and
-`gemini-vm --modules` so maths and I/O work from the IDE.
+**Next up:** Not yet drafted. Candidate directions include project/workspace support,
+multi-file builds, and debugger integration.

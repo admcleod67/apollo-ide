@@ -12,4 +12,4 @@ sort in numeric order. See [`milestones/README.md`](milestones/README.md).
 - [Milestone 1 — End-to-end edit → compile → run](milestones/01-end-to-end-mvp.md) (completed)
 - [Milestone 2 — Editor polish](milestones/02-editor-polish.md) (completed)
 - [Milestone 3 — Editor tabs](milestones/03-editor-tabs.md) (completed)
-- [Milestone 4 — Toolchain modules (maths & I/O)](milestones/04-toolchain-modules.md)
+- [Milestone 4 — Toolchain modules (maths & I/O)](milestones/04-toolchain-modules.md) (completed)
