@@ -69,24 +69,24 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 2 — Open / close / dirty (M3b)
+### Stage 2 — Open / close / dirty (M3b) — completed
 
 **Objective:** Manage tab lifetime safely.
 
 **Deliverables**
 
-- **New** creates a new untitled tab (or clears policy — prefer new tab)
-- **Open** adds a tab for the chosen file (if already open, switch to that tab)
-- **Close** tab action (and tab close button if enabled) with dirty Save / Discard / Cancel
+- **New** creates a new untitled tab
+- **Open** adds a tab for the chosen file (if already open, switch to that tab; a clean
+  empty Untitled current tab is reused instead of leaving an orphan)
+- **Close** tab action and tab close button with dirty Save / Discard / Cancel
 - Window title reflects the **current** tab’s name and dirty marker
-- Closing the window prompts for **each** dirty tab (or an aggregated prompt — document
-  the chosen behaviour; per-tab prompts are acceptable for M3)
+- Closing the window prompts for **each** dirty tab in turn (Cancel aborts quit)
 
 **Acceptance criteria**
 
-- [ ] Open two files in two tabs and edit both independently
-- [ ] Closing a dirty tab prompts; Cancel leaves the tab open
-- [ ] Re-opening an already-open path focuses the existing tab
+- [x] Open two files in two tabs and edit both independently
+- [x] Closing a dirty tab prompts; Cancel leaves the tab open
+- [x] Re-opening an already-open path focuses the existing tab
 
 ---
 
@@ -151,7 +151,7 @@ MainWindow
 | Slice | Status |
 |-------|--------|
 | M3a — Tab shell | Completed |
-| M3b — Open / close / dirty | Not started |
+| M3b — Open / close / dirty | Completed |
 | M3c — Active-tab build/run | Not started |
 | M3d — Polish & close-out | Not started |
 

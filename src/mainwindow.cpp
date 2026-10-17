@@ -8,6 +8,7 @@
 
 #include <QAction>
 #include <QCloseEvent>
+#include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QKeySequence>
@@ -32,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     resize(960, 640);
 
     m_editorTabs->setDocumentMode(true);
-    m_editorTabs->setTabsClosable(false);
+    m_editorTabs->setTabsClosable(true);
     addEditorTab();
 
     m_compilerOutput->setReadOnly(true);
@@ -56,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     applyToolchainPaths();
 
     connect(m_editorTabs, &QTabWidget::currentChanged, this, &MainWindow::onEditorTabChanged);
+    connect(m_editorTabs, &QTabWidget::tabCloseRequested, this, &MainWindow::closeEditorTab);
     connect(m_compiler, &CompilerAdapter::compileStarted, this, &MainWindow::onCompileStarted);
     connect(m_compiler, &CompilerAdapter::compileFinished, this, &MainWindow::onCompileFinished);
     connect(m_compiler, &CompilerAdapter::compileFailedToStart, this,
@@ -77,13 +79,69 @@ int MainWindow::editorTabCount() const
     return m_editorTabs->count();
 }
 
+void MainWindow::newUntitledTab()
+{
+    addEditorTab();
+}
+
+bool MainWindow::openPath(const QString &path)
+{
+    if (path.isEmpty()) {
+        return false;
+    }
+
+    const QString absolutePath = QFileInfo(path).absoluteFilePath();
+    if (EditorWidget *existing = findEditorForPath(absolutePath)) {
+        m_editorTabs->setCurrentWidget(existing);
+        return true;
+    }
+
+    EditorWidget *editor = currentEditor();
+    const bool reuseCurrent = editor != nullptr && editor->filePath().isEmpty() && !editor->isDirty()
+        && editor->toPlainText().isEmpty();
+
+    if (!reuseCurrent) {
+        editor = addEditorTab();
+    }
+
+    if (!editor->loadFile(absolutePath)) {
+        QMessageBox::warning(this, tr("Apollo IDE"),
+                             tr("Could not open file:\n%1").arg(absolutePath));
+        return false;
+    }
+
+    updateTabLabel(editor);
+    updateWindowTitle();
+    return true;
+}
+
+bool MainWindow::closeTabAt(int index)
+{
+    return closeEditorTab(index);
+}
+
 EditorWidget *MainWindow::addEditorTab()
 {
     auto *editor = new EditorWidget(m_editorTabs);
     const int index = m_editorTabs->addTab(editor, tr("Untitled"));
     m_editorTabs->setCurrentIndex(index);
-    connect(editor, &EditorWidget::documentChanged, this, &MainWindow::updateWindowTitle);
+    connect(editor, &EditorWidget::documentChanged, this, &MainWindow::onEditorDocumentChanged);
     return editor;
+}
+
+EditorWidget *MainWindow::findEditorForPath(const QString &absolutePath) const
+{
+    const QString target = QDir::cleanPath(absolutePath);
+    for (int i = 0; i < m_editorTabs->count(); ++i) {
+        auto *editor = qobject_cast<EditorWidget *>(m_editorTabs->widget(i));
+        if (editor == nullptr || editor->filePath().isEmpty()) {
+            continue;
+        }
+        if (QDir::cleanPath(QFileInfo(editor->filePath()).absoluteFilePath()) == target) {
+            return editor;
+        }
+    }
+    return nullptr;
 }
 
 void MainWindow::onEditorTabChanged(int /*index*/)
@@ -94,13 +152,46 @@ void MainWindow::onEditorTabChanged(int /*index*/)
     updateWindowTitle();
 }
 
+void MainWindow::onEditorDocumentChanged()
+{
+    auto *editor = qobject_cast<EditorWidget *>(sender());
+    if (editor != nullptr) {
+        updateTabLabel(editor);
+    }
+    updateWindowTitle();
+}
+
+void MainWindow::updateTabLabel(EditorWidget *editor)
+{
+    if (editor == nullptr) {
+        return;
+    }
+    const int index = m_editorTabs->indexOf(editor);
+    if (index < 0) {
+        return;
+    }
+
+    QString label = tr("Untitled");
+    if (!editor->filePath().isEmpty()) {
+        label = QFileInfo(editor->filePath()).fileName();
+    }
+    m_editorTabs->setTabText(index, label);
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (maybeSave()) {
-        event->accept();
-    } else {
-        event->ignore();
+    for (int i = 0; i < m_editorTabs->count(); ++i) {
+        auto *editor = qobject_cast<EditorWidget *>(m_editorTabs->widget(i));
+        if (editor == nullptr || !editor->isDirty()) {
+            continue;
+        }
+        m_editorTabs->setCurrentWidget(editor);
+        if (!maybeSave(editor)) {
+            event->ignore();
+            return;
+        }
     }
+    event->accept();
 }
 
 void MainWindow::createActions()
@@ -123,6 +214,10 @@ void MainWindow::createActions()
     m_saveAsAction = new QAction(tr("Save &As..."), this);
     m_saveAsAction->setShortcut(QKeySequence::SaveAs);
     connect(m_saveAsAction, &QAction::triggered, this, &MainWindow::saveFileAs);
+
+    m_closeAction = new QAction(tr("&Close"), this);
+    m_closeAction->setShortcut(QKeySequence::Close);
+    connect(m_closeAction, &QAction::triggered, this, &MainWindow::closeCurrentTab);
 
     m_findAction = new QAction(tr("&Find..."), this);
     m_findAction->setShortcut(QKeySequence::Find);
@@ -155,6 +250,7 @@ void MainWindow::createMenus()
     fileMenu->addAction(m_openAction);
     fileMenu->addAction(m_saveAction);
     fileMenu->addAction(m_saveAsAction);
+    fileMenu->addAction(m_closeAction);
     fileMenu->addSeparator();
     fileMenu->addAction(m_preferencesAction);
     fileMenu->addSeparator();
@@ -233,23 +329,28 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(tr("%1 — Apollo IDE").arg(name));
 }
 
-bool MainWindow::maybeSave()
+bool MainWindow::maybeSave(EditorWidget *editor)
 {
-    EditorWidget *editor = currentEditor();
     if (editor == nullptr || !editor->isDirty()) {
         return true;
     }
 
+    m_editorTabs->setCurrentWidget(editor);
+
+    const QString name = editor->filePath().isEmpty()
+        ? tr("Untitled")
+        : QFileInfo(editor->filePath()).fileName();
+
     const auto result = QMessageBox::warning(
         this,
         tr("Apollo IDE"),
-        tr("The document has been modified.\nDo you want to save your changes?"),
+        tr("The document \"%1\" has been modified.\nDo you want to save your changes?").arg(name),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
         QMessageBox::Save);
 
     switch (result) {
     case QMessageBox::Save:
-        return saveDocument();
+        return saveDocument(editor);
     case QMessageBox::Discard:
         return true;
     default:
@@ -257,15 +358,14 @@ bool MainWindow::maybeSave()
     }
 }
 
-bool MainWindow::saveDocument()
+bool MainWindow::saveDocument(EditorWidget *editor)
 {
-    EditorWidget *editor = currentEditor();
     if (editor == nullptr) {
         return false;
     }
 
     if (editor->filePath().isEmpty()) {
-        return saveDocumentAs();
+        return saveDocumentAs(editor);
     }
 
     if (!editor->save()) {
@@ -273,15 +373,17 @@ bool MainWindow::saveDocument()
                              tr("Could not save file:\n%1").arg(editor->filePath()));
         return false;
     }
+    updateTabLabel(editor);
     return true;
 }
 
-bool MainWindow::saveDocumentAs()
+bool MainWindow::saveDocumentAs(EditorWidget *editor)
 {
-    EditorWidget *editor = currentEditor();
     if (editor == nullptr) {
         return false;
     }
+
+    m_editorTabs->setCurrentWidget(editor);
 
     const QString path = QFileDialog::getSaveFileName(
         this,
@@ -297,7 +399,39 @@ bool MainWindow::saveDocumentAs()
         QMessageBox::warning(this, tr("Apollo IDE"), tr("Could not save file:\n%1").arg(path));
         return false;
     }
+    updateTabLabel(editor);
     return true;
+}
+
+bool MainWindow::closeEditorTab(int index)
+{
+    if (index < 0 || index >= m_editorTabs->count()) {
+        return false;
+    }
+
+    auto *editor = qobject_cast<EditorWidget *>(m_editorTabs->widget(index));
+    if (editor == nullptr) {
+        return false;
+    }
+
+    if (!maybeSave(editor)) {
+        return false;
+    }
+
+    m_editorTabs->removeTab(index);
+    editor->deleteLater();
+
+    if (m_editorTabs->count() == 0) {
+        addEditorTab();
+    }
+
+    updateWindowTitle();
+    return true;
+}
+
+void MainWindow::closeCurrentTab()
+{
+    closeEditorTab(m_editorTabs->currentIndex());
 }
 
 bool MainWindow::prepareSourceForBuild()
@@ -308,7 +442,7 @@ bool MainWindow::prepareSourceForBuild()
     }
 
     if (editor->isDirty() || editor->filePath().isEmpty()) {
-        if (!saveDocument()) {
+        if (!saveDocument(editor)) {
             return false;
         }
     }
@@ -325,26 +459,11 @@ bool MainWindow::prepareSourceForBuild()
 
 void MainWindow::newFile()
 {
-    EditorWidget *editor = currentEditor();
-    if (editor == nullptr) {
-        return;
-    }
-    if (!maybeSave()) {
-        return;
-    }
-    editor->newFile();
+    addEditorTab();
 }
 
 void MainWindow::openFile()
 {
-    EditorWidget *editor = currentEditor();
-    if (editor == nullptr) {
-        return;
-    }
-    if (!maybeSave()) {
-        return;
-    }
-
     const QString path = QFileDialog::getOpenFileName(
         this,
         tr("Open File"),
@@ -355,19 +474,17 @@ void MainWindow::openFile()
         return;
     }
 
-    if (!editor->loadFile(path)) {
-        QMessageBox::warning(this, tr("Apollo IDE"), tr("Could not open file:\n%1").arg(path));
-    }
+    openPath(path);
 }
 
 void MainWindow::saveFile()
 {
-    saveDocument();
+    saveDocument(currentEditor());
 }
 
 void MainWindow::saveFileAs()
 {
-    saveDocumentAs();
+    saveDocumentAs(currentEditor());
 }
 
 void MainWindow::findInDocument()

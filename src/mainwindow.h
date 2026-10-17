@@ -20,6 +20,12 @@ public:
     [[nodiscard]] EditorWidget *currentEditor() const;
     [[nodiscard]] int editorTabCount() const;
 
+    /** Open path without a file dialog (for tests and reuse). */
+    bool openPath(const QString &path);
+    /** Close tab at index without UI beyond dirty prompts. */
+    bool closeTabAt(int index);
+    void newUntitledTab();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -31,12 +37,18 @@ private:
     void updateToolchainStatus();
     void openPreferences();
     void updateWindowTitle();
-    bool maybeSave();
-    bool saveDocument();
-    bool saveDocumentAs();
+    void updateTabLabel(EditorWidget *editor);
+    void onEditorDocumentChanged();
+
+    bool maybeSave(EditorWidget *editor);
+    bool saveDocument(EditorWidget *editor);
+    bool saveDocumentAs(EditorWidget *editor);
     bool prepareSourceForBuild();
+    bool closeEditorTab(int index);
+    void closeCurrentTab();
 
     EditorWidget *addEditorTab();
+    EditorWidget *findEditorForPath(const QString &absolutePath) const;
     void onEditorTabChanged(int index);
 
     void newFile();
@@ -68,6 +80,7 @@ private:
     QAction *m_openAction = nullptr;
     QAction *m_saveAction = nullptr;
     QAction *m_saveAsAction = nullptr;
+    QAction *m_closeAction = nullptr;
     QAction *m_findAction = nullptr;
     QAction *m_preferencesAction = nullptr;
     QAction *m_quitAction = nullptr;
