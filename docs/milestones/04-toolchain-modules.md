@@ -33,10 +33,9 @@ It complements:
 
 ### Starting point
 
-Milestone 3 delivers multi-tab editing with Compile/Run on the active document. Adapters
-still use the older CLI:
+Milestone 3 delivers multi-tab editing with Compile/Run on the active document. After
+M4a, compile uses `apolloc --tbc … -o …`. Run still uses the older CLI until M4b:
 
-- Compile: `apolloc --emit <source>` and the IDE writes stdout to a sibling `.tbc`
 - Run: `gemini-vm <tbc>` with no `--modules`
 
 ### Out of scope for Milestone 4
@@ -64,7 +63,7 @@ the **Implementation status** section when closed.
 
 ## Staged delivery plan
 
-### Stage 1 — Compile CLI (M4a)
+### Stage 1 — Compile CLI (M4a) — completed
 
 **Objective:** Produce `.tbc` with the current `apolloc --tbc` interface.
 
@@ -76,11 +75,14 @@ the **Implementation status** section when closed.
 - Adapter tests updated for the new argument list and success path
 - Document the CLI change relative to Milestone 1’s `--emit` note
 
+**Implementation note:** Milestone 1’s `apolloc --emit` + IDE-written stdout `.tbc` path is
+superseded; the compiler writes the artifact via `-o`.
+
 **Acceptance criteria**
 
-- [ ] Compile of a saved `.pas` writes/updates a sibling `.tbc` via `-o`
-- [ ] Compiler diagnostics still appear on the Compiler output tab
-- [ ] Existing Compile / Run-from-IDE flow still chains on success
+- [x] Compile of a saved `.pas` writes/updates a sibling `.tbc` via `-o`
+- [x] Compiler diagnostics still appear on the Compiler output tab
+- [x] Existing Compile / Run-from-IDE flow still chains on success
 
 ---
 
@@ -148,7 +150,7 @@ MainWindow
 
 | Slice | Status |
 |-------|--------|
-| M4a — Compile CLI (`--tbc` / `-o`) | Not started |
+| M4a — Compile CLI (`--tbc` / `-o`) | Completed |
 | M4b — Modules path + VM CLI | Not started |
 | M4c — Preferences + close-out | Not started |
 

@@ -103,9 +103,11 @@ results in the IDE.
 - Discovery of the produced bytecode artifact path for Stage 3 (convention or compiler
   output parsing — document the chosen rule)
 
-**Artifact rule:** `apolloc --emit` writes `.tbc` text to stdout. On success the IDE
-writes that stdout to a sibling file: `/path/to/foo.pas` → `/path/to/foo.tbc`. Failure
-clears `lastBytecodePath()` and does not write (or leave a successful) artifact for run.
+**Artifact rule (historical M1):** originally `apolloc --emit` wrote `.tbc` text to stdout
+and the IDE saved it beside the source. **Current behaviour (Milestone 4):**  
+`apolloc --tbc <source> -o <sibling.tbc>` — see
+[Milestone 4 — Toolchain modules](04-toolchain-modules.md). Sibling path remains
+`/path/to/foo.pas` → `/path/to/foo.tbc`. Failure clears `lastBytecodePath()`.
 
 **Compiler path (M1b):** `APOLLO_COMPILER` environment variable if set; otherwise
 `apolloc` on `PATH`. Settings UI is deferred to M1d.
@@ -136,9 +138,10 @@ clears `lastBytecodePath()` and does not write (or leave a successful) artifact 
 - Capture and display VM stdout/stderr in an output pane
 - Surface non-zero VM exit status to the user
 
-**Run policy:** **Run = compile-then-run.** Save if needed, compile with `apolloc --emit`,
-and only if compile succeeds invoke `gemini-vm` on the sibling `.tbc`. Plain
-**Build → Compile** does not run the VM. Failed compile never starts the VM.
+**Run policy:** **Run = compile-then-run.** Save if needed, compile (now via
+`apolloc --tbc … -o …`; see Milestone 4), and only if compile succeeds invoke `gemini-vm`
+on the sibling `.tbc`. Plain **Build → Compile** does not run the VM. Failed compile
+never starts the VM.
 
 **VM path (M1c):** `APOLLO_VM` environment variable if set; otherwise `gemini-vm` on
 `PATH`. Settings UI is deferred to M1d.

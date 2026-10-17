@@ -29,10 +29,10 @@ signals:
 private:
     void handleProcessFinished(int exitCode, int exitStatus);
     [[nodiscard]] static QString bytecodePathForSource(const QString &sourcePath);
-    bool writeBytecodeFile(const QString &path, const QByteArray &data);
 
     QProcess *m_process = nullptr;
     QString m_compilerPath;
     QString m_sourcePath;
+    QString m_outputPath;
     QString m_lastBytecodePath;
 };

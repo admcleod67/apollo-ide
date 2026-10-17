@@ -62,7 +62,6 @@ void CompilerAdapterTest::compileSuccessWritesTbc()
 
     const QList<QVariant> args = finishedSpy.takeFirst();
     QVERIFY(args.at(0).toBool());
-    QVERIFY(args.at(1).toString().contains(QStringLiteral("PRINT")));
     QCOMPARE(args.at(3).toInt(), 0);
 
     QCOMPARE(adapter.lastBytecodePath(), tbcPath);

@@ -1,6 +1,5 @@
 #include "compileradapter.h"
 
-#include <QFile>
 #include <QFileInfo>
 #include <QProcess>
 
@@ -60,11 +59,12 @@ void CompilerAdapter::compileFile(const QString &sourcePath)
     }
 
     m_sourcePath = sourcePath;
+    m_outputPath = bytecodePathForSource(sourcePath);
     m_lastBytecodePath.clear();
 
     const QFileInfo info(sourcePath);
     m_process->setProgram(m_compilerPath);
-    m_process->setArguments({QStringLiteral("--emit"), sourcePath});
+    m_process->setArguments({QStringLiteral("--tbc"), sourcePath, QStringLiteral("-o"), m_outputPath});
     m_process->setWorkingDirectory(info.absolutePath());
     m_process->setProcessChannelMode(QProcess::SeparateChannels);
 
@@ -78,26 +78,26 @@ void CompilerAdapter::handleProcessFinished(int exitCode, int exitStatus)
     const QString stderrText = QString::fromUtf8(m_process->readAllStandardError());
 
     const bool crashed = exitStatus != static_cast<int>(QProcess::NormalExit);
-    const bool ok = !crashed && exitCode == 0;
+    const bool exitOk = !crashed && exitCode == 0;
 
-    if (ok) {
-        const QString tbcPath = bytecodePathForSource(m_sourcePath);
-        if (!writeBytecodeFile(tbcPath, stdoutText.toUtf8())) {
+    if (exitOk) {
+        if (!QFileInfo::exists(m_outputPath)) {
             m_lastBytecodePath.clear();
+            const QString missing =
+                tr("Compile succeeded but compiler did not write '%1'.").arg(m_outputPath);
             emit compileFinished(false, stdoutText,
-                                 stderrText.isEmpty()
-                                     ? tr("Compile succeeded but failed to write '%1'.").arg(tbcPath)
-                                     : stderrText + QLatin1Char('\n')
-                                           + tr("Failed to write '%1'.").arg(tbcPath),
+                                 stderrText.isEmpty() ? missing
+                                                      : stderrText + QLatin1Char('\n') + missing,
                                  exitCode);
             return;
         }
-        m_lastBytecodePath = tbcPath;
-    } else {
-        m_lastBytecodePath.clear();
+        m_lastBytecodePath = m_outputPath;
+        emit compileFinished(true, stdoutText, stderrText, exitCode);
+        return;
     }
 
-    emit compileFinished(ok, stdoutText, stderrText, exitCode);
+    m_lastBytecodePath.clear();
+    emit compileFinished(false, stdoutText, stderrText, exitCode);
 }
 
 QString CompilerAdapter::bytecodePathForSource(const QString &sourcePath)
@@ -105,13 +105,4 @@ QString CompilerAdapter::bytecodePathForSource(const QString &sourcePath)
     const QFileInfo info(sourcePath);
     return info.absolutePath() + QLatin1Char('/') + info.completeBaseName()
            + QStringLiteral(".tbc");
-}
-
-bool CompilerAdapter::writeBytecodeFile(const QString &path, const QByteArray &data)
-{
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
-        return false;
-    }
-    return file.write(data) == data.size();
 }
