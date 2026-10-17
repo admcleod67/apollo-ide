@@ -9,15 +9,18 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QDir>
+#include <QEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QKeySequence>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QMouseEvent>
 #include <QPlainTextEdit>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QStyle>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QToolBar>
 
@@ -34,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_editorTabs->setDocumentMode(true);
     m_editorTabs->setTabsClosable(true);
+    m_editorTabs->tabBar()->installEventFilter(this);
     addEditorTab();
 
     m_compilerOutput->setReadOnly(true);
@@ -78,6 +82,14 @@ EditorWidget *MainWindow::currentEditor() const
 int MainWindow::editorTabCount() const
 {
     return m_editorTabs->count();
+}
+
+QString MainWindow::editorTabText(int index) const
+{
+    if (index < 0 || index >= m_editorTabs->count()) {
+        return {};
+    }
+    return m_editorTabs->tabText(index);
 }
 
 void MainWindow::newUntitledTab()
@@ -176,7 +188,25 @@ void MainWindow::updateTabLabel(EditorWidget *editor)
     if (!editor->filePath().isEmpty()) {
         label = QFileInfo(editor->filePath()).fileName();
     }
+    if (editor->isDirty()) {
+        label.prepend(QLatin1Char('*'));
+    }
     m_editorTabs->setTabText(index, label);
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == m_editorTabs->tabBar() && event->type() == QEvent::MouseButtonRelease) {
+        auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        if (mouseEvent->button() == Qt::MiddleButton) {
+            const int index = m_editorTabs->tabBar()->tabAt(mouseEvent->pos());
+            if (index >= 0) {
+                closeEditorTab(index);
+                return true;
+            }
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

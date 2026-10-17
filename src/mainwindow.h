@@ -6,6 +6,7 @@ class CompilerAdapter;
 class EditorWidget;
 class QAction;
 class QCloseEvent;
+class QEvent;
 class QPlainTextEdit;
 class QTabWidget;
 class VmAdapter;
@@ -19,6 +20,7 @@ public:
 
     [[nodiscard]] EditorWidget *currentEditor() const;
     [[nodiscard]] int editorTabCount() const;
+    [[nodiscard]] QString editorTabText(int index) const;
 
     /** Open path without a file dialog (for tests and reuse). */
     bool openPath(const QString &path);
@@ -30,6 +32,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     void createActions();

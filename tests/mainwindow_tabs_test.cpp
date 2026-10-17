@@ -18,6 +18,7 @@ private slots:
     void closeLastTabLeavesOneUntitled();
     void tabBuffersAreIndependent();
     void saveCurrentDocumentDoesNotClearOtherTabDirty();
+    void dirtyTabTitleShowsStarUntilSaved();
 };
 
 void MainWindowTabsTest::startsWithOneUntitledEditorTab()
@@ -222,6 +223,28 @@ void MainWindowTabsTest::saveCurrentDocumentDoesNotClearOtherTabDirty()
     QVERIFY(window.openPath(pathB));
     QVERIFY(window.currentEditor()->isDirty());
     QCOMPARE(window.currentEditor()->toPlainText(), QStringLiteral("program B2;\n"));
+}
+
+void MainWindowTabsTest::dirtyTabTitleShowsStarUntilSaved()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("sample.pas"));
+    {
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Text));
+        file.write("program Sample;\n");
+    }
+
+    MainWindow window;
+    QVERIFY(window.openPath(path));
+    QCOMPARE(window.editorTabText(0), QStringLiteral("sample.pas"));
+
+    window.currentEditor()->setContent(QStringLiteral("program Sample2;\n"), true);
+    QCOMPARE(window.editorTabText(0), QStringLiteral("*sample.pas"));
+
+    QVERIFY(window.saveCurrentDocument());
+    QCOMPARE(window.editorTabText(0), QStringLiteral("sample.pas"));
 }
 
 QTEST_MAIN(MainWindowTabsTest)

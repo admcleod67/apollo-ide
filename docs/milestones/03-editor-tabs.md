@@ -111,22 +111,22 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 4 — Polish & close-out (M3d)
+### Stage 4 — Polish & close-out (M3d) — completed
 
 **Objective:** Finish multi-tab UX and close the milestone.
 
 **Deliverables**
 
 - Tab title shows basename (with `*` when dirty)
-- Optional: middle-click or shortcut to close tab
+- Middle-click closes a tab; File → Close (`QKeySequence::Close`) remains available
 - Docs updated; Implementation status completed
 - Version bump policy: report `0.3.0` when M3 closes (tag `v0.3.0` as a separate release
   step)
 
 **Acceptance criteria**
 
-- [ ] M3a–M3c acceptance criteria met
-- [ ] Milestone 3 marked completed in [`docs/milestones.md`](../milestones.md)
+- [x] M3a–M3c acceptance criteria met
+- [x] Milestone 3 marked completed in [`docs/milestones.md`](../milestones.md)
 
 ---
 
@@ -155,7 +155,7 @@ MainWindow
 | M3a — Tab shell | Completed |
 | M3b — Open / close / dirty | Completed |
 | M3c — Active-tab build/run | Completed |
-| M3d — Polish & close-out | Not started |
+| M3d — Polish & close-out | Completed |
 
 ---
 
