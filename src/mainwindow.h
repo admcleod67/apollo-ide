@@ -25,6 +25,8 @@ public:
     /** Close tab at index without UI beyond dirty prompts. */
     bool closeTabAt(int index);
     void newUntitledTab();
+    /** Save the current tab only (for tests and File→Save). */
+    bool saveCurrentDocument();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -38,12 +40,14 @@ private:
     void openPreferences();
     void updateWindowTitle();
     void updateTabLabel(EditorWidget *editor);
+    void updateBuildActionsEnabled();
     void onEditorDocumentChanged();
+    void clearPendingBuild();
 
     bool maybeSave(EditorWidget *editor);
     bool saveDocument(EditorWidget *editor);
     bool saveDocumentAs(EditorWidget *editor);
-    bool prepareSourceForBuild();
+    bool prepareSourceForBuild(EditorWidget *editor);
     bool closeEditorTab(int index);
     void closeCurrentTab();
 
@@ -75,6 +79,7 @@ private:
     CompilerAdapter *m_compiler = nullptr;
     VmAdapter *m_vm = nullptr;
     bool m_runAfterCompile = false;
+    QString m_pendingBuildSourcePath;
 
     QAction *m_newAction = nullptr;
     QAction *m_openAction = nullptr;

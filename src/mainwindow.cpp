@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_vm, &VmAdapter::runFinished, this, &MainWindow::onRunFinished);
     connect(m_vm, &VmAdapter::runFailedToStart, this, &MainWindow::onRunFailedToStart);
 
+    updateBuildActionsEnabled();
     updateWindowTitle();
 }
 
@@ -434,9 +435,22 @@ void MainWindow::closeCurrentTab()
     closeEditorTab(m_editorTabs->currentIndex());
 }
 
-bool MainWindow::prepareSourceForBuild()
+void MainWindow::updateBuildActionsEnabled()
 {
-    EditorWidget *editor = currentEditor();
+    const bool busy = m_compiler->isRunning() || m_vm->isRunning();
+    const bool hasEditor = currentEditor() != nullptr;
+    m_compileAction->setEnabled(hasEditor && !busy);
+    m_runAction->setEnabled(hasEditor && !busy);
+}
+
+void MainWindow::clearPendingBuild()
+{
+    m_runAfterCompile = false;
+    m_pendingBuildSourcePath.clear();
+}
+
+bool MainWindow::prepareSourceForBuild(EditorWidget *editor)
+{
     if (editor == nullptr) {
         return false;
     }
@@ -447,14 +461,18 @@ bool MainWindow::prepareSourceForBuild()
         }
     }
 
-    editor = currentEditor();
-    if (editor == nullptr || editor->filePath().isEmpty()) {
+    if (editor->filePath().isEmpty()) {
         QMessageBox::information(this, tr("Apollo IDE"),
                                  tr("Save the source file before compiling."));
         return false;
     }
 
     return true;
+}
+
+bool MainWindow::saveCurrentDocument()
+{
+    return saveDocument(currentEditor());
 }
 
 void MainWindow::newFile()
@@ -479,7 +497,7 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
-    saveDocument(currentEditor());
+    saveCurrentDocument();
 }
 
 void MainWindow::saveFileAs()
@@ -500,16 +518,19 @@ void MainWindow::compileFile()
         return;
     }
 
-    m_runAfterCompile = false;
-    if (!prepareSourceForBuild()) {
-        return;
-    }
-
     EditorWidget *editor = currentEditor();
     if (editor == nullptr) {
         return;
     }
-    m_compiler->compileFile(editor->filePath());
+
+    m_runAfterCompile = false;
+    if (!prepareSourceForBuild(editor)) {
+        return;
+    }
+
+    m_pendingBuildSourcePath = editor->filePath();
+    m_compiler->compileFile(m_pendingBuildSourcePath);
+    updateBuildActionsEnabled();
 }
 
 void MainWindow::runFile()
@@ -518,23 +539,26 @@ void MainWindow::runFile()
         return;
     }
 
-    if (!prepareSourceForBuild()) {
-        return;
-    }
-
     EditorWidget *editor = currentEditor();
     if (editor == nullptr) {
         return;
     }
 
+    if (!prepareSourceForBuild(editor)) {
+        return;
+    }
+
     m_runAfterCompile = true;
-    m_compiler->compileFile(editor->filePath());
+    m_pendingBuildSourcePath = editor->filePath();
+    m_compiler->compileFile(m_pendingBuildSourcePath);
+    updateBuildActionsEnabled();
 }
 
 void MainWindow::onCompileStarted()
 {
     m_outputTabs->setCurrentWidget(m_compilerOutput);
     m_compilerOutput->setPlainText(tr("Compiling…"));
+    updateBuildActionsEnabled();
 }
 
 void MainWindow::onCompileFinished(bool ok, const QString &stdoutText,
@@ -564,24 +588,30 @@ void MainWindow::onCompileFinished(bool ok, const QString &stdoutText,
     m_outputTabs->setCurrentWidget(m_compilerOutput);
 
     const bool shouldRun = m_runAfterCompile;
-    m_runAfterCompile = false;
+    const QString bytecodePath = m_compiler->lastBytecodePath();
+    clearPendingBuild();
+    updateBuildActionsEnabled();
 
-    if (shouldRun && ok && !m_compiler->lastBytecodePath().isEmpty()) {
-        m_vm->runBytecode(m_compiler->lastBytecodePath());
+    // Run the bytecode from the pinned compile, not whichever tab is current.
+    if (shouldRun && ok && !bytecodePath.isEmpty()) {
+        m_vm->runBytecode(bytecodePath);
+        updateBuildActionsEnabled();
     }
 }
 
 void MainWindow::onCompileFailedToStart(const QString &message)
 {
-    m_runAfterCompile = false;
+    clearPendingBuild();
     m_outputTabs->setCurrentWidget(m_compilerOutput);
     m_compilerOutput->setPlainText(message);
+    updateBuildActionsEnabled();
 }
 
 void MainWindow::onRunStarted()
 {
     m_outputTabs->setCurrentWidget(m_runtimeOutput);
     m_runtimeOutput->setPlainText(tr("Running…"));
+    updateBuildActionsEnabled();
 }
 
 void MainWindow::onRunFinished(bool ok, const QString &stdoutText, const QString &stderrText,
@@ -606,10 +636,12 @@ void MainWindow::onRunFinished(bool ok, const QString &stdoutText, const QString
 
     m_runtimeOutput->setPlainText(text);
     m_outputTabs->setCurrentWidget(m_runtimeOutput);
+    updateBuildActionsEnabled();
 }
 
 void MainWindow::onRunFailedToStart(const QString &message)
 {
     m_outputTabs->setCurrentWidget(m_runtimeOutput);
     m_runtimeOutput->setPlainText(message);
+    updateBuildActionsEnabled();
 }

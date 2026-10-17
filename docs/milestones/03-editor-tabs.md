@@ -90,7 +90,7 @@ the **Implementation status** section when closed.
 
 ---
 
-### Stage 3 — Active-tab build/run (M3c)
+### Stage 3 — Active-tab build/run (M3c) — completed
 
 **Objective:** Keep compile/run semantics clear with multiple documents.
 
@@ -100,12 +100,14 @@ the **Implementation status** section when closed.
 - Compile still writes sibling `.tbc` beside that tab’s path
 - Run remains compile-then-run for the current tab
 - Disable or no-op build actions gracefully when no current editor exists
+- Compile/Run pin the source path at invoke time so switching tabs during a build does
+  not retarget Run; Compile/Run actions are disabled while the compiler or VM is busy
 
 **Acceptance criteria**
 
-- [ ] Compiling tab A does not save or overwrite tab B’s buffer
-- [ ] Run on the current tab executes that file’s bytecode after a successful compile
-- [ ] Switching tabs after compile does not auto-run another tab
+- [x] Compiling tab A does not save or overwrite tab B’s buffer
+- [x] Run on the current tab executes that file’s bytecode after a successful compile
+- [x] Switching tabs after compile does not auto-run another tab
 
 ---
 
@@ -152,7 +154,7 @@ MainWindow
 |-------|--------|
 | M3a — Tab shell | Completed |
 | M3b — Open / close / dirty | Completed |
-| M3c — Active-tab build/run | Not started |
+| M3c — Active-tab build/run | Completed |
 | M3d — Polish & close-out | Not started |
 
 ---
