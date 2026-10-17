@@ -22,7 +22,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , m_editor(new EditorWidget(this))
+    , m_editorTabs(new QTabWidget(this))
     , m_outputTabs(new QTabWidget(this))
     , m_compilerOutput(new QPlainTextEdit(this))
     , m_runtimeOutput(new QPlainTextEdit(this))
@@ -30,6 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
     , m_vm(new VmAdapter(this))
 {
     resize(960, 640);
+
+    m_editorTabs->setDocumentMode(true);
+    m_editorTabs->setTabsClosable(false);
+    addEditorTab();
 
     m_compilerOutput->setReadOnly(true);
     m_compilerOutput->setPlaceholderText(tr("Compiler output"));
@@ -40,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_outputTabs->addTab(m_runtimeOutput, tr("Runtime"));
 
     auto *splitter = new QSplitter(Qt::Vertical, this);
-    splitter->addWidget(m_editor);
+    splitter->addWidget(m_editorTabs);
     splitter->addWidget(m_outputTabs);
     splitter->setStretchFactor(0, 3);
     splitter->setStretchFactor(1, 1);
@@ -51,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     createToolBar();
     applyToolchainPaths();
 
-    connect(m_editor, &EditorWidget::documentChanged, this, &MainWindow::updateWindowTitle);
+    connect(m_editorTabs, &QTabWidget::currentChanged, this, &MainWindow::onEditorTabChanged);
     connect(m_compiler, &CompilerAdapter::compileStarted, this, &MainWindow::onCompileStarted);
     connect(m_compiler, &CompilerAdapter::compileFinished, this, &MainWindow::onCompileFinished);
     connect(m_compiler, &CompilerAdapter::compileFailedToStart, this,
@@ -60,6 +64,33 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_vm, &VmAdapter::runFinished, this, &MainWindow::onRunFinished);
     connect(m_vm, &VmAdapter::runFailedToStart, this, &MainWindow::onRunFailedToStart);
 
+    updateWindowTitle();
+}
+
+EditorWidget *MainWindow::currentEditor() const
+{
+    return qobject_cast<EditorWidget *>(m_editorTabs->currentWidget());
+}
+
+int MainWindow::editorTabCount() const
+{
+    return m_editorTabs->count();
+}
+
+EditorWidget *MainWindow::addEditorTab()
+{
+    auto *editor = new EditorWidget(m_editorTabs);
+    const int index = m_editorTabs->addTab(editor, tr("Untitled"));
+    m_editorTabs->setCurrentIndex(index);
+    connect(editor, &EditorWidget::documentChanged, this, &MainWindow::updateWindowTitle);
+    return editor;
+}
+
+void MainWindow::onEditorTabChanged(int /*index*/)
+{
+    if (EditorWidget *editor = currentEditor()) {
+        editor->setFocus(Qt::OtherFocusReason);
+    }
     updateWindowTitle();
 }
 
@@ -184,12 +215,18 @@ void MainWindow::openPreferences()
 
 void MainWindow::updateWindowTitle()
 {
-    QString name = tr("Untitled");
-    if (!m_editor->filePath().isEmpty()) {
-        name = QFileInfo(m_editor->filePath()).fileName();
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        setWindowTitle(tr("Apollo IDE"));
+        return;
     }
 
-    if (m_editor->isDirty()) {
+    QString name = tr("Untitled");
+    if (!editor->filePath().isEmpty()) {
+        name = QFileInfo(editor->filePath()).fileName();
+    }
+
+    if (editor->isDirty()) {
         name.prepend(QLatin1Char('*'));
     }
 
@@ -198,7 +235,8 @@ void MainWindow::updateWindowTitle()
 
 bool MainWindow::maybeSave()
 {
-    if (!m_editor->isDirty()) {
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr || !editor->isDirty()) {
         return true;
     }
 
@@ -221,13 +259,18 @@ bool MainWindow::maybeSave()
 
 bool MainWindow::saveDocument()
 {
-    if (m_editor->filePath().isEmpty()) {
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return false;
+    }
+
+    if (editor->filePath().isEmpty()) {
         return saveDocumentAs();
     }
 
-    if (!m_editor->save()) {
+    if (!editor->save()) {
         QMessageBox::warning(this, tr("Apollo IDE"),
-                             tr("Could not save file:\n%1").arg(m_editor->filePath()));
+                             tr("Could not save file:\n%1").arg(editor->filePath()));
         return false;
     }
     return true;
@@ -235,17 +278,22 @@ bool MainWindow::saveDocument()
 
 bool MainWindow::saveDocumentAs()
 {
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return false;
+    }
+
     const QString path = QFileDialog::getSaveFileName(
         this,
         tr("Save As"),
-        m_editor->filePath(),
+        editor->filePath(),
         tr("Pascal sources (*.pas);;All files (*)"));
 
     if (path.isEmpty()) {
         return false;
     }
 
-    if (!m_editor->saveToFile(path)) {
+    if (!editor->saveToFile(path)) {
         QMessageBox::warning(this, tr("Apollo IDE"), tr("Could not save file:\n%1").arg(path));
         return false;
     }
@@ -254,13 +302,19 @@ bool MainWindow::saveDocumentAs()
 
 bool MainWindow::prepareSourceForBuild()
 {
-    if (m_editor->isDirty() || m_editor->filePath().isEmpty()) {
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return false;
+    }
+
+    if (editor->isDirty() || editor->filePath().isEmpty()) {
         if (!saveDocument()) {
             return false;
         }
     }
 
-    if (m_editor->filePath().isEmpty()) {
+    editor = currentEditor();
+    if (editor == nullptr || editor->filePath().isEmpty()) {
         QMessageBox::information(this, tr("Apollo IDE"),
                                  tr("Save the source file before compiling."));
         return false;
@@ -271,14 +325,22 @@ bool MainWindow::prepareSourceForBuild()
 
 void MainWindow::newFile()
 {
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return;
+    }
     if (!maybeSave()) {
         return;
     }
-    m_editor->newFile();
+    editor->newFile();
 }
 
 void MainWindow::openFile()
 {
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return;
+    }
     if (!maybeSave()) {
         return;
     }
@@ -293,7 +355,7 @@ void MainWindow::openFile()
         return;
     }
 
-    if (!m_editor->loadFile(path)) {
+    if (!editor->loadFile(path)) {
         QMessageBox::warning(this, tr("Apollo IDE"), tr("Could not open file:\n%1").arg(path));
     }
 }
@@ -310,7 +372,9 @@ void MainWindow::saveFileAs()
 
 void MainWindow::findInDocument()
 {
-    m_editor->showFind();
+    if (EditorWidget *editor = currentEditor()) {
+        editor->showFind();
+    }
 }
 
 void MainWindow::compileFile()
@@ -324,7 +388,11 @@ void MainWindow::compileFile()
         return;
     }
 
-    m_compiler->compileFile(m_editor->filePath());
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return;
+    }
+    m_compiler->compileFile(editor->filePath());
 }
 
 void MainWindow::runFile()
@@ -337,8 +405,13 @@ void MainWindow::runFile()
         return;
     }
 
+    EditorWidget *editor = currentEditor();
+    if (editor == nullptr) {
+        return;
+    }
+
     m_runAfterCompile = true;
-    m_compiler->compileFile(m_editor->filePath());
+    m_compiler->compileFile(editor->filePath());
 }
 
 void MainWindow::onCompileStarted()

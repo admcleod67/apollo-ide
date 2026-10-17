@@ -94,3 +94,35 @@ target_link_libraries(toolchainsettings_test PRIVATE
 )
 
 add_test(NAME toolchainsettings_test COMMAND toolchainsettings_test)
+
+add_executable(mainwindow_tabs_test
+    mainwindow_tabs_test.cpp
+    ../src/mainwindow.cpp
+    ../src/mainwindow.h
+    ../src/editorwidget.cpp
+    ../src/editorwidget.h
+    ../src/pascalhighlighter.cpp
+    ../src/pascalhighlighter.h
+    ../src/compileradapter.cpp
+    ../src/compileradapter.h
+    ../src/vmadapter.cpp
+    ../src/vmadapter.h
+    ../src/toolchainsettings.cpp
+    ../src/toolchainsettings.h
+    ../src/settingsdialog.cpp
+    ../src/settingsdialog.h
+)
+
+target_include_directories(mainwindow_tabs_test PRIVATE
+    "${CMAKE_SOURCE_DIR}/src"
+)
+
+target_link_libraries(mainwindow_tabs_test PRIVATE
+    Qt6::Widgets
+    Qt6::Test
+)
+
+add_test(NAME mainwindow_tabs_test COMMAND mainwindow_tabs_test)
+set_tests_properties(mainwindow_tabs_test PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)

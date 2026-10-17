@@ -51,7 +51,7 @@ the **Implementation status** section when closed.
 
 ## Staged delivery plan
 
-### Stage 1 — Tab shell (M3a)
+### Stage 1 — Tab shell (M3a) — completed
 
 **Objective:** Replace the single central editor with a `QTabWidget` of editors.
 
@@ -63,9 +63,9 @@ the **Implementation status** section when closed.
 
 **Acceptance criteria**
 
-- [ ] At least one editor tab is always present at startup
-- [ ] Switching tabs changes which widget has focus
-- [ ] Milestone 2 highlighting/line numbers still work in a tab
+- [x] At least one editor tab is always present at startup
+- [x] Switching tabs changes which widget has focus
+- [x] Milestone 2 highlighting/line numbers still work in a tab
 
 ---
 
@@ -150,7 +150,7 @@ MainWindow
 
 | Slice | Status |
 |-------|--------|
-| M3a — Tab shell | Not started |
+| M3a — Tab shell | Completed |
 | M3b — Open / close / dirty | Not started |
 | M3c — Active-tab build/run | Not started |
 | M3d — Polish & close-out | Not started |

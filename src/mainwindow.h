@@ -17,6 +17,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
+    [[nodiscard]] EditorWidget *currentEditor() const;
+    [[nodiscard]] int editorTabCount() const;
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -32,6 +35,9 @@ private:
     bool saveDocument();
     bool saveDocumentAs();
     bool prepareSourceForBuild();
+
+    EditorWidget *addEditorTab();
+    void onEditorTabChanged(int index);
 
     void newFile();
     void openFile();
@@ -50,7 +56,7 @@ private:
     void onRunFinished(bool ok, const QString &stdoutText, const QString &stderrText, int exitCode);
     void onRunFailedToStart(const QString &message);
 
-    EditorWidget *m_editor = nullptr;
+    QTabWidget *m_editorTabs = nullptr;
     QTabWidget *m_outputTabs = nullptr;
     QPlainTextEdit *m_compilerOutput = nullptr;
     QPlainTextEdit *m_runtimeOutput = nullptr;
